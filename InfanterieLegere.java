@@ -1,5 +1,5 @@
-public class InfanterieLegere extends Unite {
 
+public class InfanterieLegere extends Unite {
     public InfanterieLegere() {
         this.nom = "Infanterie Légère";
         this.pointsDeVieMax = 35;
@@ -11,15 +11,5 @@ public class InfanterieLegere extends Unite {
 
         this.ajouterArme(Arme.EPEE);
         this.ajouterArme(Arme.ARC);
-    }
-
-    @Override
-    public int calculerDegats(Unite cible, TypeDeTerrain terrain) {
-        int degatsTotaux = 0;
-        for (Arme arme : armes) {
-            int degatsArme = arme.getDegats();
-            degatsTotaux += Math.max(0, degatsArme - cible.getDefense());
-        }
-        return degatsTotaux;
     }
 }

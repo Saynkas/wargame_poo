@@ -1,5 +1,5 @@
-public class Mage extends Unite {
 
+public class Mage extends Unite {
     public Mage() {
         this.nom = "Mage";
         this.pointsDeVieMax = 25;
@@ -11,15 +11,5 @@ public class Mage extends Unite {
 
         this.ajouterArme(Arme.BÂTON);
         this.ajouterArme(Arme.BOULE_DE_FEU);
-    }
-
-    @Override
-    public int calculerDegats(Unite cible, TypeDeTerrain terrain) {
-        int degatsTotaux = 0;
-        for (Arme arme : armes) {
-            int degatsArme = arme.getDegats();
-            degatsTotaux += Math.max(0, degatsArme - cible.getDefense());
-        }
-        return degatsTotaux;
     }
 }

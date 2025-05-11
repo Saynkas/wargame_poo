@@ -10,24 +10,54 @@ public abstract class Unite {
     protected int vision;
     protected String nom;
     protected List<Arme> armes;
+    protected boolean aAttaqueOuDeplaceCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
 
     public Unite() {
         this.armes = new ArrayList<>();
+        this.aAttaqueOuDeplaceCeTour = false;
     }
 
-    // Ajouter une arme à l'unité
     public void ajouterArme(Arme arme) {
         armes.add(arme);
     }
 
-    // Calcul des dégâts à partir des armes
-    public int calculerDegats(Unite cible, TypeDeTerrain terrain) {
+    public int calculerDegats(Unite cible, TypeDeTerrain terrain, int distance) { // Calcule les dégâts infligés à la cible en fonction de la portée de l'arme et des bonus de terrain
         int degatsTotaux = 0;
+        int bonusAttaque = terrain.getBonusAttaque();
+        int bonusDefense = terrain.getBonusDefense();
+
         for (Arme arme : armes) {
-            int degatsArme = arme.getDegats();
-            degatsTotaux += Math.max(0, degatsArme - cible.getDefense());
+            if (distance <= arme.getPortee()) { // Vérifie si l'arme peut atteindre la cible
+                int degatsArme = arme.getDegats() + this.attaque + bonusAttaque;
+                int defenseCible = cible.getDefense() + bonusDefense;
+                int degats = Math.max(0, degatsArme - defenseCible);
+                degatsTotaux += degats;
+            }
         }
         return degatsTotaux;
+    }
+
+    public void attaquer(Unite cible, TypeDeTerrain terrain, int distance) {
+        int degats = calculerDegats(cible, terrain, distance);
+        if (degats > 0) {
+            cible.subirDegats(degats);
+            this.aAttaqueOuDeplaceCeTour = true;
+        }
+    }
+
+    public void subirDegats(int degats) {
+        this.pointsDeVie = Math.max(0, this.pointsDeVie - degats);
+    }
+
+    public void reinitialiserTour() {
+        aAttaqueOuDeplaceCeTour = false; // Réinitialise l'état de l'unité à la fin du tour
+    }
+
+    public void recupererPV() {
+        if (!aAttaqueOuDeplaceCeTour && estVivant()) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour
+            int recuperation = (int) Math.ceil(0.1 * pointsDeVieMax); // Récupère 10% des PV max
+            this.pointsDeVie = Math.min(pointsDeVieMax, pointsDeVie + recuperation); // Assure que les PV ne dépassent pas le maximum
+        }
     }
 
     public boolean estVivant() {
