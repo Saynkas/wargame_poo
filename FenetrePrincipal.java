@@ -1,32 +1,60 @@
 import javax.swing.*;
 import java.awt.*;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
+
+
+
 
 public class FenetrePrincipal extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private HexPlateau hexPlateau;
+    private Clip backgroundClip;
+
+    private void playSound(String soundPath) {
+        try {
+            File soundFile = new File(soundPath);
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void playBackgroundMusic(String soundPath) {
+        try {
+            File soundFile = new File(soundPath);
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+            backgroundClip = AudioSystem.getClip();
+            backgroundClip.open(audioIn);
+            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY);
+            backgroundClip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
 
     public FenetrePrincipal() {
         super("Fenetre mainMenu");
 
         setSize(1700, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //fin du code a la fermeture
-        setLocationRelativeTo(null); //centrer la fenetre
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-        // Initialisation du gestionnaire de vues
         cardLayout = new CardLayout();
         mainPanel = new JPanel();
         mainPanel.setLayout(cardLayout);
 
-
-        // Creation des differentes vues
         JPanel menuPanel = creeMenuPanel();
-        Plateau plateau = new Plateau(12, 18); // ou la taille souhaitée
+        Plateau plateau = new Plateau(12, 18);
         hexPlateau = new HexPlateau(plateau);
         JPanel jeuPanel = creeJeuPanel(plateau);
 
-        // Ajout des vues au CardLayout
         mainPanel.add(menuPanel, "menu");
         mainPanel.add(jeuPanel, "plateau");
 
@@ -34,43 +62,32 @@ public class FenetrePrincipal extends JFrame {
         setVisible(true);
     }
 
+
     private JPanel creeMenuPanel() {
-        JPanel panel = new JPanel();
-        panel = new BackGroundPanel("./backGroundImages/background_wargame.png");
+        JPanel panel = new BackGroundPanel("./backGroundImages/background_wargame.png");
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         ImageIcon logoIcon = new ImageIcon("./backGroundImages/rage_of_ancients.png");
         JLabel logoLabel = new JLabel(logoIcon);
         logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-
-        JButton playButton = new JButton("Jouer");
-        JButton guideButton = new JButton("Règles");
-        JButton exitButton = new JButton("Quitter");
-
-        Dimension buttonDimension = new Dimension(150, 100);
-        playButton.setMaximumSize(buttonDimension);
-        guideButton.setMaximumSize(buttonDimension);
-        exitButton.setMaximumSize(buttonDimension);
-
-        playButton.setFont(new Font("Arial", Font.BOLD, 20));
-        guideButton.setFont(new Font("Arial", Font.BOLD, 20));
-        exitButton.setFont(new Font("Arial", Font.BOLD, 20));
-
-        playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        guideButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+        JButton playButton = createStyledButton("Jouer");
+        JButton guideButton = createStyledButton("Règles");
+        JButton exitButton = createStyledButton("Quitter");
 
         playButton.addActionListener(e -> cardLayout.show(mainPanel, "plateau"));
-        guideButton.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "Bienvenue dans ce Wargame tactique tour par tour !\n" +
-                "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
-                "chaque décision compte.\n\n" +
-                "Objectif :\n" +
-                "- Détruire toutes les unités ennemies\nOU\n" +
-                "- Survivre jusqu’au dernier tour (selon le scénario)."));
-        exitButton.addActionListener(e -> System.exit(0));
+
+        guideButton.addActionListener(e ->
+            JOptionPane.showMessageDialog(this,
+                    "Bienvenue dans ce Wargame tactique tour par tour !\n" +
+                    "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
+                    "chaque décision compte.\n\n" +
+                    "Objectif :\n" +
+                    "- Détruire toutes les unités ennemies\nOU\n" +
+                    "- Survivre jusqu’au dernier tour (selon le scénario)."));
+
+        exitButton.addActionListener(e ->
+            System.exit(0));
 
 
         panel.add(Box.createVerticalGlue());
@@ -86,10 +103,46 @@ public class FenetrePrincipal extends JFrame {
         return panel;
     }
 
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Serif", Font.BOLD, 22));
+        button.setForeground(new Color(0xEFC870));
+        button.setBackground(new Color(0x581F0E));
+        button.setFocusPainted(false);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(true);
+        button.setContentAreaFilled(true);
+
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0x000000), 2),
+                BorderFactory.createEmptyBorder(12, 30, 12, 30)
+        ));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(0x7A2E19));
+                button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(0x000000), 2),
+                        BorderFactory.createEmptyBorder(11, 30, 13, 30)
+                ));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(0x581F0E));
+                button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(0x000000), 2),
+                        BorderFactory.createEmptyBorder(12, 30, 12, 30)
+                ));
+            }
+        });
+
+        return button;
+    }
+
     private JPanel creeJeuPanel(Plateau plateau) {
         JPanel jeuPanel = new JPanel(new BorderLayout());
 
-        // Bouton retour en haut
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton retourButton = new JButton("Retour au menu");
         retourButton.addActionListener(e -> cardLayout.show(mainPanel, "menu"));
@@ -99,7 +152,6 @@ public class FenetrePrincipal extends JFrame {
         controlePanel.setBackground(new Color(240, 240, 240));
         controlePanel.setBorder(BorderFactory.createEmptyBorder(300, 10, 10, 10));
 
-        //buttons  des unites
         JButton infanterieBtn = new JButton("Infanterie");
         infanterieBtn.setPreferredSize(new Dimension(120, 50));
         infanterieBtn.addActionListener(e -> {
@@ -108,7 +160,6 @@ public class FenetrePrincipal extends JFrame {
         });
 
         controlePanel.add(infanterieBtn);
-
 
         jeuPanel.add(topPanel, BorderLayout.NORTH);
         jeuPanel.add(hexPlateau, BorderLayout.CENTER);
@@ -129,5 +180,4 @@ public class FenetrePrincipal extends JFrame {
             g.drawImage(backGroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
-
 }
