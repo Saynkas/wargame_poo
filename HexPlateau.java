@@ -10,6 +10,9 @@ public class HexPlateau extends JPanel {
 
     private Plateau plateau;
     private Unite uniteSelectionnee;
+    private boolean estEntrainDeplace;
+    private int ligneInitial =-1;
+    private int colonneInitial =-1;
 
     //unite selectionnee par le joueur
     public void setUniteSelectionnee(Unite unite) {
@@ -43,10 +46,30 @@ public class HexPlateau extends JPanel {
 
                 if(hex.contains(x,y)){
                     HexCase hexCase = plateau.getCase(i, j);
-                    if(!hexCase.estOccupee()){
-                        hexCase.placerUnite(uniteSelectionnee);
-                        uniteSelectionnee = null;
-                        repaint();
+                    if (!hexCase.estOccupee()) {
+                        if (estEntrainDeplace) {
+                            if (estVoisine(ligneInitial, colonneInitial, i, j)) {
+                                hexCase.placerUnite(uniteSelectionnee);
+                                estEntrainDeplace = false;
+                                uniteSelectionnee = null;
+                                repaint();
+                            }
+                        } else {
+                            // Premier placement (pas un déplacement)
+                            hexCase.placerUnite(uniteSelectionnee);
+                            uniteSelectionnee = null;
+                            estEntrainDeplace = false;
+                            repaint();
+                        }
+                    }
+                    else{
+                        
+                        uniteSelectionnee = hexCase.getUnite();
+                        hexCase.retirerUnite();
+                        estEntrainDeplace = true;
+                        ligneInitial = i;
+                        colonneInitial = j;
+                        
                     }
                 }
             }
@@ -112,6 +135,19 @@ public class HexPlateau extends JPanel {
         }
     }
 
+    private boolean estVoisine(int i1, int j1, int i2, int j2) {
+        int[][] directionsPair = { {-1, 0}, {-1, +1}, {0, -1}, {0, +1}, {1, 0}, {1, +1} };
+        int[][] directionsImpair = { {-1, -1}, {-1, 0}, {0, -1}, {0, +1}, {1, -1}, {1, 0} };
+        
+        int[][] directions = (j1 % 2 == 0) ? directionsPair : directionsImpair;
+    
+        for(int[] dir : directions) {
+            if(i1 + dir[0] == i2 && j1 + dir[1] == j2) {
+                return true;
+            }
+        }
+        return false;
+    }
     
 
 

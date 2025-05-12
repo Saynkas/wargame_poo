@@ -1,6 +1,9 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Random;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+
 
 public class HexCase{
 
@@ -15,6 +18,10 @@ public class HexCase{
         this.colonne = colonne;
         this.terrain = terrain;
         this.unite = null;
+    }
+
+    public Unite getUnite(){
+        return unite;
     }
 
     public boolean estOccupee(){
@@ -49,5 +56,9 @@ public class HexCase{
             g.drawString(unite.getNom().substring(0, 1), x - 3, y + 5);            
         }
     }
+
+    
+    
+
 
 }
