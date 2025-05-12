@@ -60,6 +60,7 @@ public class FenetrePrincipal extends JFrame {
 
         add(mainPanel);
         setVisible(true);
+        playBackgroundMusic("assets/sounds/menu_theme_ok.wav");
     }
 
 
@@ -75,19 +76,27 @@ public class FenetrePrincipal extends JFrame {
         JButton guideButton = createStyledButton("Règles");
         JButton exitButton = createStyledButton("Quitter");
 
-        playButton.addActionListener(e -> cardLayout.show(mainPanel, "plateau"));
+        playButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            cardLayout.show(mainPanel, "plateau");
+        });
 
-        guideButton.addActionListener(e ->
-            JOptionPane.showMessageDialog(this,
-                    "Bienvenue dans ce Wargame tactique tour par tour !\n" +
-                    "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
-                    "chaque décision compte.\n\n" +
-                    "Objectif :\n" +
-                    "- Détruire toutes les unités ennemies\nOU\n" +
-                    "- Survivre jusqu’au dernier tour (selon le scénario)."));
+        guideButton.addActionListener(e -> {
+        playSound("assets/sounds/click_fantasy_ok.wav");
+        JOptionPane.showMessageDialog(this,
+            "Bienvenue dans ce Wargame tactique tour par tour !\n" +
+            "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
+            "chaque décision compte.\n\n" +
+            "Objectif :\n" +
+            "- Détruire toutes les unités ennemies\nOU\n" +
+            "- Survivre jusqu’au dernier tour (selon le scénario).");
+        });
 
-        exitButton.addActionListener(e ->
-            System.exit(0));
+        exitButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            System.exit(0);
+        });
+
 
 
         panel.add(Box.createVerticalGlue());
