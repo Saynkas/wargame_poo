@@ -16,7 +16,7 @@ public class FenetrePrincipal extends JFrame {
 
         // Initialisation du gestionnaire de vues
         cardLayout = new CardLayout();
-        mainPanel = new BackGroundPanel("./backGroundImages/still-life-map-with-dices.jpg");
+        mainPanel = new JPanel();
         mainPanel.setLayout(cardLayout);
 
 
@@ -36,15 +36,16 @@ public class FenetrePrincipal extends JFrame {
 
     private JPanel creeMenuPanel() {
         JPanel panel = new JPanel();
+        panel = new BackGroundPanel("./backGroundImages/background_wargame.png");
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel title = new JLabel("WarGame");
-        title.setFont(new Font("Impact", Font.BOLD, 60));
-        title.setForeground(Color.BLACK);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        ImageIcon logoIcon = new ImageIcon("./backGroundImages/rage_of_ancients.png");
+        JLabel logoLabel = new JLabel(logoIcon);
+        logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton playButton = new JButton("play");
-        JButton guideButton = new JButton("Parametre");
+
+        JButton playButton = new JButton("Jouer");
+        JButton guideButton = new JButton("Règles");
         JButton exitButton = new JButton("Quitter");
 
         Dimension buttonDimension = new Dimension(150, 100);
@@ -73,7 +74,7 @@ public class FenetrePrincipal extends JFrame {
 
 
         panel.add(Box.createVerticalGlue());
-        panel.add(title);
+        panel.add(logoLabel);
         panel.add(Box.createRigidArea(new Dimension(0, 100)));
         panel.add(playButton);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
