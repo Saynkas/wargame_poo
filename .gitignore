@@ -1,0 +1,19 @@
+# Fichiers compilés .class
+*.class
+
+# Fichiers générés par l'IDE
+bin/
+out/
+*.iml
+.idea/
+*.project
+*.settings/
+
+# Fichiers de build (Maven/Gradle)
+target/
+build/
+.gradle/
+
+# Autres fichiers temporaires
+*.log
+*.tmp
