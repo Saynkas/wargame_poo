@@ -7,8 +7,6 @@ import javax.swing.ImageIcon;
 
 public class HexCase{
 
-    //public enum Terrain{Plat, Foret, Montagne, Eau};
-
     private TypeDeTerrain terrain;
     private Unite unite;
     private int ligne, colonne;
@@ -56,8 +54,8 @@ public class HexCase{
                 Image img = icon.getImage();
                 
                 // Dessine l'image centrée sur l'hexagone
-                int imgWidth = 30;  // Ajustez selon vos besoins
-                int imgHeight = 30; // Ajustez selon vos besoins
+                int imgWidth = 30;
+                int imgHeight = 30;
                 g.drawImage(img, x - imgWidth/2, y - imgHeight/2, imgWidth, imgHeight, null);
                 
             } catch (Exception e) {
@@ -72,7 +70,6 @@ public class HexCase{
 
     private String getImagePathForUnit(Unite unite) {
         // Retourne le chemin de l'image en fonction du type d'unité
-        // Adaptez ces chemins selon votre structure de fichiers
         if (unite instanceof InfanterieLourde) {
             return "./assets/InfanterieLourde.png";
         } else if (unite instanceof Archer) {
@@ -84,7 +81,7 @@ public class HexCase{
         } else if (unite instanceof Cavalerie) {
             return "./assets/Cavalerie.png";
         } else {
-            return "./assets/Infanterie.png"; // Image par défaut
+            return "./assets/error.png"; // Image par défaut
         }
     }
 }
