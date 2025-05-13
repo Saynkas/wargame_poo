@@ -38,20 +38,36 @@ public class HexPlateau extends JPanel {
                 Point center = hexToPixel(j, i);
                 Polygon hex = createHexagon(center.x, center.y);
 
-                if(hex.contains(x,y)) {
+                if(hex.contains(x,y)){
+
                     HexCase hexCase = plateau.getCase(i, j);
-                    
-                    if (uniteSelectionnee != null && !hexCase.estOccupee()) {
-                        // Placement d'une nouvelle unité
-                        hexCase.placerUnite(uniteSelectionnee);
-                        uniteSelectionnee = null;
-                        repaint();
-                    } 
-                    else if (hexCase.estOccupee()) {
-                        // Sélection d'une unité existante
+
+                    if (!hexCase.estOccupee()) {
+                        if (estEntrainDeplace) {
+
+                            if (estVoisine(ligneInitial, colonneInitial, i, j)) {
+
+                                hexCase.placerUnite(uniteSelectionnee);
+                                estEntrainDeplace = false;
+                                uniteSelectionnee = null;
+                                repaint();
+                            }
+
+
+                        } else {
+                            hexCase.placerUnite(uniteSelectionnee);
+                            uniteSelectionnee = null;
+                            estEntrainDeplace = false;
+                            repaint();
+                        }
+                    }
+                    else{
+
                         uniteSelectionnee = hexCase.getUnite();
                         hexCase.retirerUnite();
-                        repaint();
+                        estEntrainDeplace = true;
+                        ligneInitial = i;
+                        colonneInitial = j;
                     }
                 }
             }
