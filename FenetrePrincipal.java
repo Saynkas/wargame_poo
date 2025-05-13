@@ -58,6 +58,8 @@ public class FenetrePrincipal extends JFrame {
         add(mainPanel);
         setVisible(true);
         playBackgroundMusic("assets/sounds/menu_theme_ok.wav");
+
+
     }
 
     class FenetreRegles extends JDialog {
@@ -232,6 +234,35 @@ public class FenetrePrincipal extends JFrame {
         return button;
     }
 
+    private void demarrerJeu(JPanel jPanel) {
+
+    }
+
+    private void endTurn(String joueur, int tour){
+        JFrame jFrame = new JFrame();
+        JDialog dialog = new JDialog(jFrame, "Test");
+
+        dialog.setUndecorated(true);
+        JLabel messageLabel = new JLabel("Le tour " + tour + " du joueur " + joueur + " commence !", SwingConstants.CENTER);
+        messageLabel.setFont(new Font("Serif", Font.BOLD, 20));
+
+        // On place le JLabel dans le JDialog
+        dialog.setLayout(new BorderLayout());
+        dialog.add(messageLabel, BorderLayout.CENTER);
+
+        // Rendre la fenêtre visible immédiatement
+        dialog.setSize(300, 150);
+        dialog.setLocationRelativeTo(jFrame);  // Centrer par rapport au parent
+        dialog.setVisible(true);
+
+        Timer timer = new Timer(2000, e -> {
+            dialog.dispose();
+        });
+
+        timer.setRepeats(false);
+        timer.start();
+    }
+
     private JPanel creeJeuPanel(Plateau plateau) {
         JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
         jeuPanel.setLayout(new BorderLayout());
@@ -247,6 +278,17 @@ public class FenetrePrincipal extends JFrame {
         });
         topPanel.add(retourButton);
 
+        // Explication de la phase de préparation
+        JLabel explicationPrep = new JLabel("Phase de préparation : chaque joueur peut mettre autant d'unités qu'il veut, là où il veut, puis cliquer sur le bouton de démarrage à droite quand l'organisation des unités est satisfaisante.");
+        explicationPrep.setForeground(Color.WHITE);
+        explicationPrep.setFont(new Font("Serif", Font.BOLD, 13));
+        topPanel.add(explicationPrep);
+
+        // Explication de la phase de jeu
+        JLabel explicationJeu = new JLabel("Phase de jeu : chaque joueur peut utiliser ses unités comme il le souhaite, et son tour sera terminé dès qu'aucune de ses unités ne peut bouger, ou bien prématurément en appuyant sur le bouton à droite.");
+        explicationJeu.setForeground(Color.WHITE);
+        explicationJeu.setFont(new Font("Serif", Font.BOLD, 13));
+
         // Panel principal qui contient les trois colonnes
         JPanel mainGamePanel = new JPanel(new BorderLayout());
         mainGamePanel.setOpaque(false); // <-- Ajoute ça aussi
@@ -256,6 +298,27 @@ public class FenetrePrincipal extends JFrame {
         leftUnitsPanel.setOpaque(false); // <-- Et ici
         JPanel rightUnitsPanel = createUnitsPanel("right");
         rightUnitsPanel.setOpaque(false); // <-- Et ici aussi
+
+        // Bouton de fin de tour
+        JButton buttonEndTurn = new JButton("Terminer son tour");
+        buttonEndTurn.addActionListener(e -> {
+            endTurn("1", 1);
+        });
+
+        // Création du bouton pour démarrer la partie
+        JButton startGame = new JButton("Démarrer la partie !");
+        startGame.addActionListener(e-> {
+            mainGamePanel.remove(leftUnitsPanel);
+            mainGamePanel.remove(rightUnitsPanel);
+            topPanel.remove(explicationPrep);
+            topPanel.remove(startGame);
+            topPanel.add(explicationJeu);
+            topPanel.add(buttonEndTurn);
+            revalidate();
+            demarrerJeu(jeuPanel);
+        });
+        topPanel.add(startGame);
+
 
         // Ajout des composants
         mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
