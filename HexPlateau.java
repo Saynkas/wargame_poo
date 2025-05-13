@@ -1,9 +1,6 @@
-import javax.swing.*;
-
-//import Git.wargame_poo.HexCase.Terrain;
-
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 
 public class HexPlateau extends JPanel {
     private static final int RADIUS = 30; //diametre de l'hexagone
@@ -35,41 +32,26 @@ public class HexPlateau extends JPanel {
     }
 
     //intercation avec le plateau
-    private void gererClick(int x, int y){
-        if (uniteSelectionnee == null) {
-            return;
-        }
-        for(int i = 0; i < plateau.getLignes(); i++){
-            for(int j = 0; j < plateau.getColonnes(); j++){
+    private void gererClick(int x, int y) {
+        for(int i = 0; i < plateau.getLignes(); i++) {
+            for(int j = 0; j < plateau.getColonnes(); j++) {
                 Point center = hexToPixel(j, i);
                 Polygon hex = createHexagon(center.x, center.y);
 
-                if(hex.contains(x,y)){
+                if(hex.contains(x,y)) {
                     HexCase hexCase = plateau.getCase(i, j);
-                    if (!hexCase.estOccupee()) {
-                        if (estEntrainDeplace) {
-                            if (estVoisine(ligneInitial, colonneInitial, i, j)) {
-                                hexCase.placerUnite(uniteSelectionnee);
-                                estEntrainDeplace = false;
-                                uniteSelectionnee = null;
-                                repaint();
-                            }
-                        } else {
-                            // Premier placement (pas un déplacement)
-                            hexCase.placerUnite(uniteSelectionnee);
-                            uniteSelectionnee = null;
-                            estEntrainDeplace = false;
-                            repaint();
-                        }
-                    }
-                    else{
-                        
+                    
+                    if (uniteSelectionnee != null && !hexCase.estOccupee()) {
+                        // Placement d'une nouvelle unité
+                        hexCase.placerUnite(uniteSelectionnee);
+                        uniteSelectionnee = null;
+                        repaint();
+                    } 
+                    else if (hexCase.estOccupee()) {
+                        // Sélection d'une unité existante
                         uniteSelectionnee = hexCase.getUnite();
                         hexCase.retirerUnite();
-                        estEntrainDeplace = true;
-                        ligneInitial = i;
-                        colonneInitial = j;
-                        
+                        repaint();
                     }
                 }
             }
@@ -97,19 +79,15 @@ public class HexPlateau extends JPanel {
     }
 
 
-    private Color getColorForTerrain(HexCase.Terrain terrain) {
-        switch (terrain) {
-            case Plat:
-                return new Color(180, 240, 180); // vert clair
-            case Foret:
-                return new Color(34, 139, 34); // vert foncé
-            case Montagne:
-                return new Color(139, 137, 137); // gris
-            case Eau:
-                return Color.BLUE;
-            default:
-                return Color.LIGHT_GRAY;
-        }
+    private Color getColorForTerrain(TypeDeTerrain terrain) {
+        return switch (terrain) {
+            case PLAINE -> new Color(180, 240, 180);// vert clair
+            case FORET -> new Color(34, 139, 34);// vert foncé
+            case MONTAGNE -> new Color(139, 137, 137);// gris
+            case COLLINE -> new Color(255, 228, 181);// beige
+            case FORTERESSE -> new Color(255, 215, 0);// or
+            default -> Color.LIGHT_GRAY;
+        }; 
     }
     @Override
     protected void paintComponent(Graphics g) {

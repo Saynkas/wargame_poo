@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 public class UniteSelectionPanel extends JPanel {
     private HexPlateau hexPlateau;
     private JLabel uniteInfoLabel;
@@ -28,7 +30,7 @@ public class UniteSelectionPanel extends JPanel {
     //donner des info sur l'unite selectionne
     private void updateUniteInfo(Unite unite) {
         String info = String.format("%s - PV : %d, att : %d, def : %d, dep : %d",
-                unite.getnom(),
+                unite.getNom(),
                 unite.getPointsDeVie(),
                 unite.getAttaque(),
                 unite.getDefense(),

@@ -7,7 +7,7 @@ public class Plateau{
         cases = new HexCase[ligne][colonne];
         for(int i = 0; i < ligne ; i++){
             for(int j = 0; j < colonne ; j++){
-                HexCase.Terrain terrain = HexCase.choixRandTerrain();
+                TypeDeTerrain terrain = HexCase.choixRandTerrain();
                 cases[i][j] = new HexCase(i, j, terrain);
             }
         }

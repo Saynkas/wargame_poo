@@ -1,11 +1,8 @@
-import javax.swing.*;
 import java.awt.*;
-import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
-
-
-
+import javax.sound.sampled.*;
+import javax.swing.*;
 
 public class FenetrePrincipal extends JFrame {
 
@@ -63,7 +60,6 @@ public class FenetrePrincipal extends JFrame {
         playBackgroundMusic("assets/sounds/menu_theme_ok.wav");
     }
 
-
     private JPanel creeMenuPanel() {
         JPanel panel = new BackGroundPanel("./backGroundImages/background_wargame.png");
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -82,22 +78,20 @@ public class FenetrePrincipal extends JFrame {
         });
 
         guideButton.addActionListener(e -> {
-        playSound("assets/sounds/click_fantasy_ok.wav");
-        JOptionPane.showMessageDialog(this,
-            "Bienvenue dans ce Wargame tactique tour par tour !\n" +
-            "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
-            "chaque décision compte.\n\n" +
-            "Objectif :\n" +
-            "- Détruire toutes les unités ennemies\nOU\n" +
-            "- Survivre jusqu’au dernier tour (selon le scénario).");
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            JOptionPane.showMessageDialog(this,
+                "Bienvenue dans ce Wargame tactique tour par tour !\n" +
+                "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
+                "chaque décision compte.\n\n" +
+                "Objectif :\n" +
+                "- Détruire toutes les unités ennemies\nOU\n" +
+                "- Survivre jusqu'au dernier tour (selon le scénario).");
         });
 
         exitButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
             System.exit(0);
         });
-
-
 
         panel.add(Box.createVerticalGlue());
         panel.add(logoLabel);
@@ -152,29 +146,93 @@ public class FenetrePrincipal extends JFrame {
     private JPanel creeJeuPanel(Plateau plateau) {
         JPanel jeuPanel = new JPanel(new BorderLayout());
 
+        // Panel du haut avec bouton retour
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton retourButton = new JButton("Retour au menu");
-        retourButton.addActionListener(e -> cardLayout.show(mainPanel, "menu"));
+        retourButton.addActionListener(e -> {
+            cardLayout.show(mainPanel, "menu");
+            backgroundClip.stop();
+            playBackgroundMusic("assets/sounds/menu_theme_ok.wav");
+        });
         topPanel.add(retourButton);
 
-        JPanel controlePanel = new JPanel();
-        controlePanel.setBackground(new Color(240, 240, 240));
-        controlePanel.setBorder(BorderFactory.createEmptyBorder(300, 10, 10, 10));
+        // Panel principal qui contient les trois colonnes
+        JPanel mainGamePanel = new JPanel(new BorderLayout());
 
-        JButton infanterieBtn = new JButton("Infanterie");
-        infanterieBtn.setPreferredSize(new Dimension(120, 50));
-        infanterieBtn.addActionListener(e -> {
-            hexPlateau.setUniteSelectionnee(new Infanterie());
-            JOptionPane.showMessageDialog(this, "Infanterie sélectionnée !");
-        });
+        // Création des panneaux d'unités
+        JPanel leftUnitsPanel = createUnitsPanel("left");
+        JPanel rightUnitsPanel = createUnitsPanel("right");
 
-        controlePanel.add(infanterieBtn);
+        // Ajout des composants
+        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+        mainGamePanel.add(hexPlateau, BorderLayout.CENTER);
+        mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
 
+        // Configuration finale
         jeuPanel.add(topPanel, BorderLayout.NORTH);
-        jeuPanel.add(hexPlateau, BorderLayout.CENTER);
-        jeuPanel.add(controlePanel, BorderLayout.WEST);
+        jeuPanel.add(mainGamePanel, BorderLayout.CENTER);
 
         return jeuPanel;
+    }
+
+    private JPanel createUnitsPanel(String side) {
+        JPanel unitsPanel = new JPanel();
+        unitsPanel.setLayout(new BoxLayout(unitsPanel, BoxLayout.Y_AXIS));
+        unitsPanel.setBackground(new Color(240, 240, 240));
+        unitsPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+
+        String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
+        String[] unitImages = {
+            "./assets/InfanterieLourde.png",
+            "./assets/Archer.png",
+            "./assets/Mage.png",
+            "./assets/InfanterieLegere.png",
+            "./assets/Cavalerie.png"
+        };
+
+        for (int i = 0; i < unitTypes.length; i++) {
+            final int index = i;
+            JButton unitBtn = createUnitButton(unitTypes[index], unitImages[index]);
+            unitBtn.addActionListener(e -> {
+                selectUnit(unitTypes[index]);
+                JOptionPane.showMessageDialog(this, unitTypes[index] + " sélectionnée !");
+            });
+            unitsPanel.add(unitBtn);
+            if (index < unitTypes.length - 1) {
+                unitsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            }
+        }
+
+        return unitsPanel;
+    }
+
+    private JButton createUnitButton(String unitName, String imagePath) {
+        JButton button = new JButton(unitName);
+        button.setPreferredSize(new Dimension(150, 60));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        try {
+            ImageIcon icon = new ImageIcon(imagePath);
+            Image img = icon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            button.setIcon(new ImageIcon(img));
+            button.setHorizontalTextPosition(SwingConstants.RIGHT);
+            button.setIconTextGap(10);
+        } catch (Exception e) {
+            System.err.println("Erreur de chargement de l'image: " + imagePath);
+        }
+        
+        return button;
+    }
+
+    private void selectUnit(String unitType) {
+        switch (unitType) {
+            case "Infanterie Lourde" -> hexPlateau.setUniteSelectionnee(new InfanterieLourde());
+            case "Archer" -> hexPlateau.setUniteSelectionnee(new Archer());
+            case "Mage" -> hexPlateau.setUniteSelectionnee(new Mage());
+            case "Infanterie Legere" -> hexPlateau.setUniteSelectionnee(new InfanterieLegere());
+            case "Cavalerie" -> hexPlateau.setUniteSelectionnee(new Cavalerie());
+            default -> hexPlateau.setUniteSelectionnee(new Infanterie());
+        }
     }
 
     class BackGroundPanel extends JPanel {
@@ -188,5 +246,9 @@ public class FenetrePrincipal extends JFrame {
             super.paintComponent(g);
             g.drawImage(backGroundImage, 0, 0, getWidth(), getHeight(), this);
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new FenetrePrincipal());
     }
 }
