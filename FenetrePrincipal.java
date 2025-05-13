@@ -60,6 +60,100 @@ public class FenetrePrincipal extends JFrame {
         playBackgroundMusic("assets/sounds/menu_theme_ok.wav");
     }
 
+    class FenetreRegles extends JDialog {
+
+        public FenetreRegles(JFrame parent) {
+            super(parent, "Règles du jeu", true);
+            setSize(700, 500);
+            setLocationRelativeTo(parent);
+            setLayout(new BorderLayout());
+
+
+            // Utilise JEditorPane pour plus de flexibilité HTML
+            JEditorPane reglesText = new JEditorPane();
+
+            try {
+                Font papyrusFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/police/papyrus.ttf"))
+                                    .deriveFont(Font.PLAIN, 16f);
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                ge.registerFont(papyrusFont);
+                reglesText.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+                reglesText.setFont(papyrusFont);
+            } catch (IOException | FontFormatException e) {
+                e.printStackTrace();
+                // En cas d'erreur, on garde le style par défaut
+            }
+
+            reglesText.setContentType("text/html");
+            reglesText.setEditable(false);
+            reglesText.setOpaque(false);
+
+            reglesText.setText("""
+                <html>
+                <body style="
+                    background-color: #fdf5e6;
+                    color: #5b3e1d;
+                    font-family: 'Papyrus', 'Book Antiqua', 'Serif';
+                    font-size: 16px;
+                    padding: 20px;
+                    border: 4px double #8b5a2b;
+                ">
+                    <h1 style='text-align: center; color: #7b3f00;'> Règles du jeu</h1>
+                    <p>Bienvenue noble seigneur dans ce <b>wargame tactique tour par tour</b> !</p>
+                    <p>Affrontez vos adversaires sur un <b>champ de bataille hexagonal</b>, où chaque décision forge le destin.</p>
+                    <h2><img src='file:backGroundImages/icones/epees.png' width='20' height='20' style='vertical-align: middle;'/> Objectifs :</h2>
+                    <ul>
+                        <li><b> Détruire toutes les unités ennemies</b></li>
+                        <li><b> Ou survivre jusqu'au dernier tour</b> (selon le scénario)</li>
+                    </ul>
+                    <h2><img src='file:backGroundImages/icones/bouclier.png' width='20' height='20' style='vertical-align: middle;'/> Mécaniques principales :</h2>
+                    <ul>
+                        <li> Déploiement stratégique de vos troupes</li>
+                        <li> Utilisation du terrain et de la portée</li>
+                        <li> Compétences uniques par unité</li>
+                    </ul>
+                    <p style='text-align:center; font-size: 18px; color: #8b0000;'><i>Que la gloire vous accompagne, Commandant ! <img src='file:backGroundImages/icones/chevalier-a-cheval.png' width='20' height='20' style='vertical-align: middle;'/> </i></p>
+                </body>
+                </html>
+            """);
+
+            JScrollPane scrollPane = new JScrollPane(reglesText);
+            scrollPane.setOpaque(false);
+            scrollPane.getViewport().setOpaque(false);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            // Fermer
+            JButton closeBtn = new JButton("Fermer");
+            closeBtn.setBackground(new Color(88, 31, 14));
+            closeBtn.setForeground(new Color(239, 200, 112));
+            closeBtn.setFont(new Font("Serif", Font.BOLD, 16));
+            closeBtn.addActionListener(e -> dispose());
+
+            JPanel bottomPanel = new JPanel();
+            bottomPanel.setBackground(new Color(253, 245, 230)); // beige parchemin
+            bottomPanel.add(closeBtn);
+
+            JPanel fondPanel = new JPanel() {
+                Image img = new ImageIcon("backGroundImages/parchemin.jpg").getImage();
+
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g); // important : appeler super AVANT le dessin de fond
+                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                }
+            };
+            fondPanel.setLayout(new BorderLayout());
+            fondPanel.setOpaque(false); // au cas où
+
+            fondPanel.add(scrollPane, BorderLayout.CENTER);
+            fondPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+            setContentPane(fondPanel);
+
+        }
+    }
+
+
     private JPanel creeMenuPanel() {
         JPanel panel = new BackGroundPanel("./backGroundImages/background_wargame.png");
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -79,14 +173,9 @@ public class FenetrePrincipal extends JFrame {
 
         guideButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
-            JOptionPane.showMessageDialog(this,
-                "Bienvenue dans ce Wargame tactique tour par tour !\n" +
-                "Affrontez vos adversaires sur un champ de bataille hexagonal,\n" +
-                "chaque décision compte.\n\n" +
-                "Objectif :\n" +
-                "- Détruire toutes les unités ennemies\nOU\n" +
-                "- Survivre jusqu'au dernier tour (selon le scénario).");
+            new FenetreRegles(this).setVisible(true);
         });
+
 
         exitButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
@@ -144,10 +233,12 @@ public class FenetrePrincipal extends JFrame {
     }
 
     private JPanel creeJeuPanel(Plateau plateau) {
-        JPanel jeuPanel = new JPanel(new BorderLayout());
+        JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
+        jeuPanel.setLayout(new BorderLayout());
 
         // Panel du haut avec bouton retour
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setOpaque(false); // <-- Ajoute ça
         JButton retourButton = new JButton("Retour au menu");
         retourButton.addActionListener(e -> {
             cardLayout.show(mainPanel, "menu");
@@ -158,10 +249,13 @@ public class FenetrePrincipal extends JFrame {
 
         // Panel principal qui contient les trois colonnes
         JPanel mainGamePanel = new JPanel(new BorderLayout());
-
+        mainGamePanel.setOpaque(false); // <-- Ajoute ça aussi
+        
         // Création des panneaux d'unités
         JPanel leftUnitsPanel = createUnitsPanel("left");
+        leftUnitsPanel.setOpaque(false); // <-- Et ici
         JPanel rightUnitsPanel = createUnitsPanel("right");
+        rightUnitsPanel.setOpaque(false); // <-- Et ici aussi
 
         // Ajout des composants
         mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);

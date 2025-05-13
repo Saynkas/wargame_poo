@@ -20,6 +20,7 @@ public class HexPlateau extends JPanel {
     public HexPlateau(Plateau plateau){
         this.plateau = plateau;
         this.uniteSelectionnee = null;
+        setOpaque(false);
 
         
         //avoir les coordonee de la souris au moment de l'appuie
