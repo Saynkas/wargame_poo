@@ -29,6 +29,7 @@ public class HexPlateau extends JPanel {
         this.plateau = plateau;
         this.uniteSelectionnee = null;
         this.placementNouvelleUnite = false;
+        setOpaque(false);
 
         
         //avoir les coordonee de la souris au moment de l'appui
@@ -47,7 +48,8 @@ public class HexPlateau extends JPanel {
                 Point center = hexToPixel(j, i);
                 Polygon hex = createHexagon(center.x, center.y);
 
-                if (hex.contains(x, y)) {
+                if(hex.contains(x,y)){
+
                     HexCase hexCase = plateau.getCase(i, j);
                     
                     if (placementNouvelleUnite) {
