@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.sound.sampled.*;
 import javax.swing.*;
 
@@ -10,6 +12,7 @@ public class FenetrePrincipal extends JFrame {
     private JPanel mainPanel;
     private HexPlateau hexPlateau;
     private Clip backgroundClip;
+    private Partie partie;
 
     private void playSound(String soundPath) {
         try {
@@ -171,6 +174,7 @@ public class FenetrePrincipal extends JFrame {
         playButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
             cardLayout.show(mainPanel, "plateau");
+            partie = new Partie(new Joueur("joueur 1"), new Joueur("joueur 2"));
         });
 
         guideButton.addActionListener(e -> {
@@ -234,11 +238,7 @@ public class FenetrePrincipal extends JFrame {
         return button;
     }
 
-    private void demarrerJeu(JPanel jPanel) {
-
-    }
-
-    private void endTurn(String joueur, int tour){
+    private void endTurn(int joueur, int tour){
         JFrame jFrame = new JFrame();
         JDialog dialog = new JDialog(jFrame, "Test");
 
@@ -251,7 +251,7 @@ public class FenetrePrincipal extends JFrame {
         dialog.add(messageLabel, BorderLayout.CENTER);
 
         // Rendre la fenêtre visible immédiatement
-        dialog.setSize(300, 150);
+        dialog.setSize(500, 150);
         dialog.setLocationRelativeTo(jFrame);  // Centrer par rapport au parent
         dialog.setVisible(true);
 
@@ -302,7 +302,14 @@ public class FenetrePrincipal extends JFrame {
         // Bouton de fin de tour
         JButton buttonEndTurn = new JButton("Terminer son tour");
         buttonEndTurn.addActionListener(e -> {
-            endTurn("1", 1);
+            partie.setToursInd(partie.getToursInd()+1);
+            int joueur = 2;
+            if (partie.getToursInd() % 2 == 1) {
+                joueur = 1;
+                partie.setTurnNumber(partie.getTurnNumber()+1);
+            }
+            
+            endTurn(joueur, partie.getTurnNumber());
         });
 
         // Création du bouton pour démarrer la partie
@@ -314,8 +321,8 @@ public class FenetrePrincipal extends JFrame {
             topPanel.remove(startGame);
             topPanel.add(explicationJeu);
             topPanel.add(buttonEndTurn);
+            endTurn(1, 1);
             revalidate();
-            demarrerJeu(jeuPanel);
         });
         topPanel.add(startGame);
 
@@ -351,7 +358,7 @@ public class FenetrePrincipal extends JFrame {
             final int index = i;
             JButton unitBtn = createUnitButton(unitTypes[index], unitImages[index]);
             unitBtn.addActionListener(e -> {
-                selectUnit(unitTypes[index]);
+                selectUnit(unitTypes[index], side);
                 JOptionPane.showMessageDialog(this, unitTypes[index] + " sélectionnée !");
             });
             unitsPanel.add(unitBtn);
@@ -381,14 +388,60 @@ public class FenetrePrincipal extends JFrame {
         return button;
     }
 
-    private void selectUnit(String unitType) {
+    private void selectUnit(String unitType, String side) {
         switch (unitType) {
-            case "Infanterie Lourde" -> hexPlateau.setUniteSelectionnee(new InfanterieLourde());
-            case "Archer" -> hexPlateau.setUniteSelectionnee(new Archer());
-            case "Mage" -> hexPlateau.setUniteSelectionnee(new Mage());
-            case "Infanterie Legere" -> hexPlateau.setUniteSelectionnee(new InfanterieLegere());
-            case "Cavalerie" -> hexPlateau.setUniteSelectionnee(new Cavalerie());
-            default -> hexPlateau.setUniteSelectionnee(new Infanterie());
+            case "Infanterie Lourde":
+                InfanterieLourde unitIL = new InfanterieLourde();
+                if (side == "left") {
+                    partie.getJoueur1().ajouterUnite(unitIL);
+                }
+                else {
+                    partie.getJoueur2().ajouterUnite(unitIL);
+                }
+                hexPlateau.setUniteSelectionnee(unitIL);
+                break;
+            case "Archer": 
+                Archer unitA = new Archer();
+                if (side == "left") {
+                    partie.getJoueur1().ajouterUnite(unitA);
+                }
+                else {
+                    partie.getJoueur2().ajouterUnite(unitA);
+                }
+                hexPlateau.setUniteSelectionnee(unitA);
+                break;
+            case "Mage": 
+                Mage unitM = new Mage();
+                if (side == "left") {
+                    partie.getJoueur1().ajouterUnite(unitM);
+                }
+                else {
+                    partie.getJoueur2().ajouterUnite(unitM);
+                }
+                hexPlateau.setUniteSelectionnee(unitM);
+                break;
+            case "Infanterie Legere": 
+                InfanterieLegere unitILe = new InfanterieLegere();
+                if (side == "left") {
+                    partie.getJoueur1().ajouterUnite(unitILe);
+                }
+                else {
+                    partie.getJoueur2().ajouterUnite(unitILe);
+                }
+                hexPlateau.setUniteSelectionnee(unitILe);
+                break;
+            case "Cavalerie": 
+                Cavalerie unitC = new Cavalerie();
+                if (side == "left") {
+                    partie.getJoueur1().ajouterUnite(unitC);
+                }
+                else {
+                    partie.getJoueur2().ajouterUnite(unitC);
+                }
+                hexPlateau.setUniteSelectionnee(unitC);
+                break;
+            default: 
+                break;
         }
     }
 

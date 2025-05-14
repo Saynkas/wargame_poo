@@ -1,9 +1,8 @@
 import java.util.ArrayList;
-import java.util.List;
 
 public class Joueur {
     private String nom;
-    private List<Unite> unites;
+    private ArrayList<Unite> unites;
 
     public Joueur(String nom) {
         this.nom = nom;
@@ -14,7 +13,7 @@ public class Joueur {
         unites.add(unite);
     }
 
-    public List<Unite> getUnites() {
+    public ArrayList<Unite> getUnites() {
         return unites;
     }
 
