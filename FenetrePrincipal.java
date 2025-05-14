@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.format.TextStyle;
+
 import javax.sound.sampled.*;
 import javax.swing.*;
 
@@ -48,12 +50,17 @@ public class FenetrePrincipal extends JFrame {
         mainPanel.setLayout(cardLayout);
 
         JPanel menuPanel = creeMenuPanel();
+
+        JPanel lobbySetupPanel = creelobbySetupPanel();
+        
+        
         Plateau plateau = new Plateau(12, 18);
         hexPlateau = new HexPlateau(plateau);
         JPanel jeuPanel = creeJeuPanel(plateau);
 
         mainPanel.add(menuPanel, "menu");
         mainPanel.add(jeuPanel, "plateau");
+        mainPanel.add(lobbySetupPanel, "lobby");
 
         add(mainPanel);
         setVisible(true);
@@ -170,7 +177,7 @@ public class FenetrePrincipal extends JFrame {
 
         playButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
-            cardLayout.show(mainPanel, "plateau");
+            cardLayout.show(mainPanel, "lobby");
         });
 
         guideButton.addActionListener(e -> {
@@ -195,6 +202,63 @@ public class FenetrePrincipal extends JFrame {
         panel.add(Box.createVerticalGlue());
 
         return panel;
+    }
+
+    private JPanel creelobbySetupPanel()
+    {
+        JPanel lobbyPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
+        lobbyPanel.setLayout(new BorderLayout());
+
+        JLabel lobbyTitle = new JLabel("Choisit le mode du jeu", SwingConstants.CENTER);
+        lobbyTitle.setFont(new Font("Arial", Font.BOLD, 50));
+        lobbyPanel.add(lobbyTitle, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+
+
+        JButton pvpButton = createStyledButton("VS Joueur");
+        JButton pvcButton = createStyledButton("VS IA");
+        
+
+        pvpButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            cardLayout.show(mainPanel, "plateau");
+        });
+
+        pvcButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            JOptionPane.showMessageDialog(null, "pas encore fait");
+        });
+    
+
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(pvpButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(100, 0)));
+        buttonPanel.add(pvcButton);
+        buttonPanel.add(Box.createHorizontalGlue());
+
+        JPanel buttonReturnPanel = new JPanel();
+        buttonReturnPanel.setOpaque(false);
+        buttonReturnPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        JButton returnButton = createStyledButton("Retour au menu principal");
+        returnButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            cardLayout.show(mainPanel, "menu");
+        });
+        
+        buttonReturnPanel.add(returnButton);
+        lobbyPanel.setBorder(BorderFactory.createEmptyBorder(50,0,50,0));
+
+
+        // Organisation finale
+        lobbyPanel.add(buttonPanel, BorderLayout.CENTER);
+        lobbyPanel.add(buttonReturnPanel, BorderLayout.SOUTH);
+        // Positionnement en bas
+
+        return lobbyPanel;
     }
 
     private JButton createStyledButton(String text) {
@@ -262,6 +326,8 @@ public class FenetrePrincipal extends JFrame {
         timer.setRepeats(false);
         timer.start();
     }
+
+    
 
     private JPanel creeJeuPanel(Plateau plateau) {
         JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
