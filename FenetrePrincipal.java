@@ -8,6 +8,8 @@ import javax.swing.*;
 
 public class FenetrePrincipal extends JFrame {
 
+    private String pseudoJoueur1;
+    private String pseudoJoueur2;
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private HexPlateau hexPlateau;
@@ -56,10 +58,10 @@ public class FenetrePrincipal extends JFrame {
         
         Plateau plateau = new Plateau(12, 18);
         hexPlateau = new HexPlateau(plateau);
-        JPanel jeuPanel = creeJeuPanel(plateau);
+        //JPanel jeuPanel = creeJeuPanel(plateau);
 
         mainPanel.add(menuPanel, "menu");
-        mainPanel.add(jeuPanel, "plateau");
+        //mainPanel.add(jeuPanel, "plateau");
         mainPanel.add(lobbySetupPanel, "lobby");
 
         add(mainPanel);
@@ -68,6 +70,105 @@ public class FenetrePrincipal extends JFrame {
 
 
     }
+
+    class PseudoDialog extends JDialog {
+        private JTextField joueur1Field;
+        private JTextField joueur2Field;
+        private String joueur1;
+        private String joueur2;
+
+        public PseudoDialog(JFrame parent) {
+            super(parent, "Entrez les pseudos", true);
+            setSize(500, 300);
+            setLocationRelativeTo(parent);
+            setLayout(new BorderLayout());
+
+            JPanel fondPanel = new JPanel() {
+                Image img = new ImageIcon("backGroundImages/parchemin.jpg").getImage();
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                }
+            };
+            fondPanel.setLayout(new GridBagLayout());
+            fondPanel.setOpaque(false);
+
+            Font customFont;
+            try {
+                customFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/police/papyrus.ttf"))
+                                .deriveFont(Font.PLAIN, 18f);
+            } catch (Exception e) {
+                customFont = new Font("Serif", Font.BOLD, 18);
+            }
+
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(10, 10, 10, 10);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel label1 = new JLabel("Pseudo Joueur 1 :");
+            label1.setFont(customFont);
+            label1.setForeground(new Color(91, 62, 29));
+            gbc.gridx = 0; gbc.gridy = 0;
+            fondPanel.add(label1, gbc);
+
+            joueur1Field = new JTextField();
+            joueur1Field.setFont(customFont);
+            joueur1Field.setPreferredSize(new Dimension(200, 30));
+            joueur1Field.setForeground(Color.BLACK);
+            joueur1Field.setBackground(new Color(255, 255, 255));
+            joueur1Field.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            joueur1Field.setOpaque(true);
+
+            gbc.gridx = 1;
+            gbc.gridy = 0;
+            fondPanel.add(joueur1Field, gbc);
+
+
+            JLabel label2 = new JLabel("Pseudo Joueur 2 :");
+            label2.setFont(customFont);
+            label2.setForeground(new Color(91, 62, 29));
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            fondPanel.add(label2, gbc);
+
+            joueur2Field = new JTextField();
+            joueur2Field.setFont(customFont);
+            joueur2Field.setPreferredSize(new Dimension(200, 30));
+            joueur2Field.setForeground(Color.BLACK);
+            joueur2Field.setBackground(new Color(255, 255, 255));
+            joueur2Field.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            joueur2Field.setOpaque(true);
+
+            gbc.gridx = 1;
+            gbc.gridy = 1;
+            fondPanel.add(joueur2Field, gbc);
+
+            JButton validerBtn = new JButton("Valider");
+            validerBtn.setFont(customFont);
+            validerBtn.setBackground(new Color(88, 31, 14));
+            validerBtn.setForeground(new Color(239, 200, 112));
+            validerBtn.addActionListener(e -> {
+                joueur1 = joueur1Field.getText().trim();
+                joueur2 = joueur2Field.getText().trim();
+                if (!joueur1.isEmpty() && !joueur2.isEmpty()) {
+                    dispose();
+                    cardLayout.show(mainPanel, "plateau");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Les deux pseudos sont requis.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
+            gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+            fondPanel.add(validerBtn, gbc);
+
+            setContentPane(fondPanel);
+        }
+
+        public String getJoueur1() { return joueur1; }
+        public String getJoueur2() { return joueur2; }
+    }
+
 
     class FenetreRegles extends JDialog {
 
@@ -206,12 +307,15 @@ public class FenetrePrincipal extends JFrame {
 
     private JPanel creelobbySetupPanel()
     {
-        JPanel lobbyPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
+        JPanel lobbyPanel = new BackGroundPanel("./backGroundImages/carte_choix_jeu.jpg");
         lobbyPanel.setLayout(new BorderLayout());
 
-        JLabel lobbyTitle = new JLabel("Choisit le mode du jeu", SwingConstants.CENTER);
-        lobbyTitle.setFont(new Font("Arial", Font.BOLD, 50));
-        lobbyPanel.add(lobbyTitle, BorderLayout.NORTH);
+        // Chargement du logo comme ImageIcon
+        ImageIcon logoIcon = new ImageIcon("backGroundImages/logo_choix_mode_ok.png");
+        JLabel logoLabel = new JLabel(logoIcon, SwingConstants.CENTER);
+        logoLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
+        logoLabel.setOpaque(false);
+        lobbyPanel.add(logoLabel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false);
@@ -224,8 +328,27 @@ public class FenetrePrincipal extends JFrame {
 
         pvpButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
-            cardLayout.show(mainPanel, "plateau");
+            PseudoDialog pseudoDialog = new PseudoDialog(this);
+            pseudoDialog.setVisible(true);
+
+            pseudoJoueur1 = pseudoDialog.getJoueur1();
+            pseudoJoueur2 = pseudoDialog.getJoueur2();
+
+            if (pseudoJoueur1 != null && pseudoJoueur2 != null) {
+                System.out.println("Pseudo Joueur 1 : " + pseudoJoueur1);
+                System.out.println("Pseudo Joueur 2 : " + pseudoJoueur2);
+
+                Plateau plateau = new Plateau(12, 18);
+                hexPlateau = new HexPlateau(plateau);
+                JPanel jeuPanel = creeJeuPanel(plateau);
+
+                mainPanel.add(jeuPanel, "plateau");
+                cardLayout.show(mainPanel, "plateau");
+            }
+
         });
+
+
 
         pvcButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
@@ -332,6 +455,30 @@ public class FenetrePrincipal extends JFrame {
     private JPanel creeJeuPanel(Plateau plateau) {
         JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
         jeuPanel.setLayout(new BorderLayout());
+
+        // Labels pour afficher les pseudos des joueurs
+        JLabel labelJoueur1 = new JLabel("👑 " + pseudoJoueur1);
+        labelJoueur1.setFont(new Font("Serif", Font.BOLD, 20));
+        labelJoueur1.setForeground(Color.WHITE);
+        labelJoueur1.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JLabel labelJoueur2 = new JLabel(pseudoJoueur2 + " 👑");
+        labelJoueur2.setFont(new Font("Serif", Font.BOLD, 20));
+        labelJoueur2.setForeground(Color.WHITE);
+        labelJoueur2.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Panels pour positionner les labels à gauche et à droite
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setOpaque(false);
+        leftPanel.add(labelJoueur1, BorderLayout.CENTER);
+
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setOpaque(false);
+        rightPanel.add(labelJoueur2, BorderLayout.CENTER);
+
+        jeuPanel.add(leftPanel, BorderLayout.WEST);
+        jeuPanel.add(rightPanel, BorderLayout.EAST);
+
 
         // Panel du haut avec bouton retour
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
