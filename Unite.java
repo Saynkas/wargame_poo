@@ -10,11 +10,11 @@ public abstract class Unite {
     protected int vision;
     protected String nom;
     protected List<Arme> armes;
-    protected boolean aAttaqueOuDeplaceCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
+    protected boolean aAgitCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
 
     public Unite() {
         this.armes = new ArrayList<>();
-        this.aAttaqueOuDeplaceCeTour = false;
+        this.aAgitCeTour = false;
     }
 
     public void ajouterArme(Arme arme) {
@@ -41,7 +41,7 @@ public abstract class Unite {
         int degats = calculerDegats(cible, terrain, distance);
         if (degats > 0) {
             cible.subirDegats(degats);
-            this.aAttaqueOuDeplaceCeTour = true;
+            this.aAgitCeTour = true;
         }
     }
 
@@ -50,11 +50,11 @@ public abstract class Unite {
     }
 
     public void reinitialiserTour() {
-        aAttaqueOuDeplaceCeTour = false; // Réinitialise l'état de l'unité à la fin du tour
+        aAgitCeTour = false; // Réinitialise l'état de l'unité à la fin du tour
     }
 
     public void recupererPV() {
-        if (!aAttaqueOuDeplaceCeTour && estVivant()) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour
+        if (!aAgitCeTour && estVivant()) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour
             int recuperation = (int) Math.ceil(0.1 * pointsDeVieMax); // Récupère 10% des PV max
             this.pointsDeVie = Math.min(pointsDeVieMax, pointsDeVie + recuperation); // Assure que les PV ne dépassent pas le maximum
         }
@@ -114,5 +114,13 @@ public abstract class Unite {
 
     public List<Arme> getArmes() {
         return armes;
+    }
+
+    public void setAAgitCeTour(boolean bool) {
+        this.aAgitCeTour = bool;
+    }
+
+    public boolean getAAgitCeTour() {
+        return aAgitCeTour;
     }
 }
