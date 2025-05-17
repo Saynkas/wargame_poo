@@ -19,6 +19,7 @@ public class HexPlateau extends JPanel {
     private Map<Point, Integer> casesAccessiblesCache;
     private Partie partie;
     private JButton buttonEndTurn;
+    private HexCase oldHexCase;
 
     //unite selectionnee par le joueur
     public void setUniteSelectionnee(Unite unite) {
@@ -72,23 +73,30 @@ public class HexPlateau extends JPanel {
                                     ligneInitial = i;
                                     colonneInitial = j;
                                     estEntrainDeplace = true;
+                                    oldHexCase = hexCase;
                                     calculerCasesAccessibles();
                                     repaint();
                             }
                         } else if (estEntrainDeplace) {
-                            if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
-                                plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
-                                hexCase.placerUnite(uniteSelectionnee);
-                                uniteSelectionnee.setAAgitCeTour(true);
+                            if (hexCase == oldHexCase) {
                                 estEntrainDeplace = false;
                                 casesAccessiblesCache = null;
                                 repaint();
-                                if ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer() ||
-                                        (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()))
-                                        && partie.isPartieCommence()) {
-                                    buttonEndTurn.doClick();
-                                }
                             }
+                            else if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
+                                    plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                    hexCase.placerUnite(uniteSelectionnee);
+                                    uniteSelectionnee.setAAgitCeTour(true);
+                                    estEntrainDeplace = false;
+                                    casesAccessiblesCache = null;
+                                    repaint();
+                                    if ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer() ||
+                                            (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()))
+                                            && partie.isPartieCommence()) {
+                                        buttonEndTurn.doClick();
+                                    }
+                                }
+                            
                         }
                     }
                 }
