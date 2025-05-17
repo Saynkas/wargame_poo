@@ -57,4 +57,12 @@ public class Partie {
     public void setPartieCommence(boolean partieCommence) {
         this.partieCommence = partieCommence;
     }
+
+    public Joueur getJoueurActuel() {
+        if (toursInd % 2 == 1) {
+            return joueur1;
+        } else {
+            return joueur2;
+        }
+    }
 }

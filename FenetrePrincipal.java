@@ -283,7 +283,7 @@ public class FenetrePrincipal extends JFrame {
         playButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
             cardLayout.show(mainPanel, "plateau");
-            partie = new Partie(new Joueur("joueur 1"), new Joueur("joueur 2"));
+            partie = new Partie(new Joueur(1, "joueur 1"), new Joueur(2 , "joueur 2"));
             cardLayout.show(mainPanel, "lobby");
         });
 

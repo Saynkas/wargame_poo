@@ -10,6 +10,9 @@ public class HexCase{
     private TypeDeTerrain terrain;
     private Unite unite;
     private int ligne, colonne;
+    private boolean estVisible = false;
+    private boolean estVisibileParJ1 = false;
+    private boolean estVisibileParJ2 = false;
     
     public HexCase(int ligne, int colonne, TypeDeTerrain terrain){
         this.ligne = ligne;
@@ -37,6 +40,27 @@ public class HexCase{
     public TypeDeTerrain getTerrain(){
         return terrain;
     }
+
+    public boolean getEstVisible(){
+        return estVisible;
+    }
+
+    public void setEstVisible(boolean bool){
+        this.estVisible = bool;
+    }
+
+    public boolean estVisiblePour(Joueur joueur){
+        if(joueur == null) return false;
+
+        return joueur.getId() == 1? estVisibileParJ1 : estVisibileParJ2;
+
+    }
+
+    public void setVisiblePour(Joueur joueur, boolean bool){
+        if(joueur.getId() == 1) estVisibileParJ1 = bool;
+        else estVisibileParJ2 = bool;
+    }
+
     public static TypeDeTerrain choixRandTerrain(){
         Random rand = new Random();
         int indexRand = rand.nextInt(TypeDeTerrain.values().length);

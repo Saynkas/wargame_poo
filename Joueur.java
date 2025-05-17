@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 
 public class Joueur {
+    private int id;
     private String nom;
     private ArrayList<Unite> unites;
 
-    public Joueur(String nom) {
+    public Joueur(int id, String nom) {
+        this.id = id;
         this.nom = nom;
         this.unites = new ArrayList<>();
     }
@@ -16,6 +18,12 @@ public class Joueur {
     public ArrayList<Unite> getUnites() {
         return unites;
     }
+
+    public int getId(){
+        return id;
+    }
+
+    
 
     public boolean aDesUnitesVivantes() {
         for (Unite unite : unites) {

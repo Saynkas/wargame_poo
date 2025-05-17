@@ -48,6 +48,7 @@ public class HexPlateau extends JPanel {
 
     //interaction avec le plateau
     private void gererClick(int x, int y) {
+            Joueur joueurActuel = partie.getJoueurActuel();
             for (int i = 0; i < plateau.getLignes(); i++) {
                 for (int j = 0; j < plateau.getColonnes(); j++) {
                     Point center = hexToPixel(j, i);
@@ -63,6 +64,8 @@ public class HexPlateau extends JPanel {
                                 uniteSelectionnee = null;
                                 placementNouvelleUnite = false;
                                 hexCase.getUnite().setAAgitCeTour(true);
+                                rendreCasesAutourVisibles(i, j, joueurActuel);
+                                
                                 repaint();
                             }
                             return;
@@ -75,13 +78,13 @@ public class HexPlateau extends JPanel {
                                     estEntrainDeplace = true;
                                     oldHexCase = hexCase;
                                     calculerCasesAccessibles();
-                                    repaint();
+                                    rendreCasesAutourVisibles(i, j, joueurActuel);                                    repaint();
                             }
                         } else if (estEntrainDeplace) {
                             if (hexCase == oldHexCase) {
                                 estEntrainDeplace = false;
                                 casesAccessiblesCache = null;
-                                repaint();
+                                rendreCasesAutourVisibles(i, j, joueurActuel);                                repaint();
                             }
                             else if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
                                     plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
@@ -89,7 +92,7 @@ public class HexPlateau extends JPanel {
                                     uniteSelectionnee.setAAgitCeTour(true);
                                     estEntrainDeplace = false;
                                     casesAccessiblesCache = null;
-                                    repaint();
+                                    rendreCasesAutourVisibles(i, j, joueurActuel);                                    repaint();
                                     if ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer() ||
                                             (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()))
                                             && partie.isPartieCommence()) {
@@ -211,6 +214,13 @@ public class HexPlateau extends JPanel {
                 g2d.draw(hex);
 
                 hexCase.dessinerUnite(g2d, center.x, center.y);
+
+                Joueur joueurActuel = partie.getJoueurActuel();
+                if (!hexCase.estVisiblePour(joueurActuel)) {
+                    Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
+                    g2d.setColor(brouillard);
+                    g2d.fillPolygon(hex);
+                }
             }
         }
     }
@@ -228,6 +238,21 @@ public class HexPlateau extends JPanel {
         }
         return false;
     }
+
+    private void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur) {
+        // Rendre la case centrale visible
+        plateau.getCase(ligne, colonne).setVisiblePour(joueur, true);
+    
+        // Parcourir toutes les cases du plateau et tester si elles sont voisines
+        for (int i = 0; i < plateau.getLignes(); i++) {
+            for (int j = 0; j < plateau.getColonnes(); j++) {
+                if (estVoisine(ligne, colonne, i, j)) {
+                    plateau.getCase(i, j).setVisiblePour(joueur, true);
+                }
+            }
+        }
+    }
+    
 
 }
 
