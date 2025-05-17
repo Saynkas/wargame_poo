@@ -17,6 +17,7 @@ public class FenetrePrincipal extends JFrame {
     private HexPlateau hexPlateau;
     private Clip backgroundClip;
     private Partie partie;
+    private JButton buttonEndTurn = new JButton("Terminer son tour");;
 
     private void playSound(String soundPath) {
         try {
@@ -60,7 +61,7 @@ public class FenetrePrincipal extends JFrame {
 
 
         Plateau plateau = new Plateau(12, 18);
-        hexPlateau = new HexPlateau(plateau);
+        hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn);
         //JPanel jeuPanel = creeJeuPanel(plateau);
 
         mainPanel.add(menuPanel, "menu");
@@ -344,7 +345,7 @@ public class FenetrePrincipal extends JFrame {
                 System.out.println("Pseudo Joueur 2 : " + pseudoJoueur2);
 
                 Plateau plateau = new Plateau(12, 18);
-                hexPlateau = new HexPlateau(plateau);
+                hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn);
                 JPanel jeuPanel = creeJeuPanel(plateau);
 
                 mainPanel.add(jeuPanel, "plateau");
@@ -426,7 +427,7 @@ public class FenetrePrincipal extends JFrame {
         return button;
     }
 
-    private void endTurn(int joueur, int tour){
+    private void endTurn(int joueur, int tour, Partie partie){
         JFrame jFrame = new JFrame();
         JDialog dialog = new JDialog(jFrame, "Test");
 
@@ -449,6 +450,11 @@ public class FenetrePrincipal extends JFrame {
 
         timer.setRepeats(false);
         timer.start();
+
+        if (joueur == 1) partie.getJoueur1().resetAAgitCeTour();
+        else partie.getJoueur2().resetAAgitCeTour();
+      //  partie.getJoueur1().resetAAgitCeTour();
+       // partie.getJoueur2().resetAAgitCeTour();
     }
 
 
@@ -514,7 +520,6 @@ public class FenetrePrincipal extends JFrame {
         rightUnitsPanel.setOpaque(false); // <-- Et ici aussi
 
         // Bouton de fin de tour
-        JButton buttonEndTurn = new JButton("Terminer son tour");
         buttonEndTurn.addActionListener(e -> {
             partie.setToursInd(partie.getToursInd()+1);
             int joueur = 2;
@@ -523,19 +528,20 @@ public class FenetrePrincipal extends JFrame {
                 partie.setTurnNumber(partie.getTurnNumber()+1);
             }
 
-            endTurn(joueur, partie.getTurnNumber());
+            endTurn(joueur, partie.getTurnNumber(), partie);
         });
 
         // Création du bouton pour démarrer la partie
         JButton startGame = new JButton("Démarrer la partie !");
         startGame.addActionListener(e-> {
+            partie.setPartieCommence(true);
             mainGamePanel.remove(leftUnitsPanel);
             mainGamePanel.remove(rightUnitsPanel);
             topPanel.remove(explicationPrep);
             topPanel.remove(startGame);
             topPanel.add(explicationJeu);
             topPanel.add(buttonEndTurn);
-            endTurn(1, 1);
+            endTurn(1, 1, partie);
             revalidate();
         });
         topPanel.add(startGame);

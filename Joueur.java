@@ -26,6 +26,21 @@ public class Joueur {
         return false;
     }
 
+    public boolean peutEncoreJouer() {
+        for (Unite u : unites) {
+            if (!u.getAAgitCeTour()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void resetAAgitCeTour() {
+        for (Unite u : unites) {
+            u.setAAgitCeTour(false);
+        }
+    }
+
     public String getNom() {
         return nom;
     }

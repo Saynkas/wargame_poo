@@ -17,6 +17,8 @@ public class HexPlateau extends JPanel {
     private int colonneInitial =-1;
     private boolean placementNouvelleUnite;
     private Map<Point, Integer> casesAccessiblesCache;
+    private Partie partie;
+    private JButton buttonEndTurn;
 
     //unite selectionnee par le joueur
     public void setUniteSelectionnee(Unite unite) {
@@ -25,7 +27,9 @@ public class HexPlateau extends JPanel {
     }
 
 
-    public HexPlateau(Plateau plateau){
+    public HexPlateau(Plateau plateau, Partie partie, JButton buttonEndTurn){
+        this.buttonEndTurn = buttonEndTurn;
+        this.partie = partie;
         this.plateau = plateau;
         this.uniteSelectionnee = null;
         this.placementNouvelleUnite = false;
@@ -43,48 +47,53 @@ public class HexPlateau extends JPanel {
 
     //interaction avec le plateau
     private void gererClick(int x, int y) {
-        for(int i = 0; i < plateau.getLignes(); i++) {
-            for(int j = 0; j < plateau.getColonnes(); j++) {
-                Point center = hexToPixel(j, i);
-                Polygon hex = createHexagon(center.x, center.y);
+            for (int i = 0; i < plateau.getLignes(); i++) {
+                for (int j = 0; j < plateau.getColonnes(); j++) {
+                    Point center = hexToPixel(j, i);
+                    Polygon hex = createHexagon(center.x, center.y);
 
-                if(hex.contains(x,y)){
+                    if (hex.contains(x, y)) {
 
-                    HexCase hexCase = plateau.getCase(i, j);
-                    
-                    if (placementNouvelleUnite) {
-                        if (!hexCase.estOccupee()) {
-                            hexCase.placerUnite(uniteSelectionnee);
-                            uniteSelectionnee = null;
-                            placementNouvelleUnite = false;
-                            repaint();
-                        }
-                        return;
-                    }
-                    else if (hexCase.estOccupee() && !estEntrainDeplace) {
-                        if (!hexCase.getUnite().getAAgitCeTour()) {
-                            uniteSelectionnee = hexCase.getUnite();
-                            ligneInitial = i;
-                            colonneInitial = j;
-                            estEntrainDeplace = true;
-                            calculerCasesAccessibles();
-                            repaint();
-                        }
-                    }
-                    else if (estEntrainDeplace) {
-                        if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
-                            plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
-                            hexCase.placerUnite(uniteSelectionnee);
-                            uniteSelectionnee.setAAgitCeTour(true);
-                            estEntrainDeplace = false;
-                            casesAccessiblesCache = null;
-                            repaint();
+                        HexCase hexCase = plateau.getCase(i, j);
+
+                        if (placementNouvelleUnite) {
+                            if (!hexCase.estOccupee()) {
+                                hexCase.placerUnite(uniteSelectionnee);
+                                uniteSelectionnee = null;
+                                placementNouvelleUnite = false;
+                                hexCase.getUnite().setAAgitCeTour(true);
+                                repaint();
+                            }
+                            return;
+                        } else if (hexCase.estOccupee() && !estEntrainDeplace) {
+                                if (!hexCase.getUnite().getAAgitCeTour() && (partie.getJoueur1().getUnites().contains(hexCase.getUnite()) && partie.getToursInd() % 2 == 1 ||
+                                                                            (partie.getJoueur2().getUnites().contains(hexCase.getUnite()) && partie.getToursInd() % 2 == 0))) {
+                                    uniteSelectionnee = hexCase.getUnite();
+                                    ligneInitial = i;
+                                    colonneInitial = j;
+                                    estEntrainDeplace = true;
+                                    calculerCasesAccessibles();
+                                    repaint();
+                            }
+                        } else if (estEntrainDeplace) {
+                            if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
+                                plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                hexCase.placerUnite(uniteSelectionnee);
+                                uniteSelectionnee.setAAgitCeTour(true);
+                                estEntrainDeplace = false;
+                                casesAccessiblesCache = null;
+                                repaint();
+                                if ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer() ||
+                                        (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()))
+                                        && partie.isPartieCommence()) {
+                                    buttonEndTurn.doClick();
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
     // Calcul des cases accessibles et mises en cache (avec Djikstra)
     private void calculerCasesAccessibles() {
