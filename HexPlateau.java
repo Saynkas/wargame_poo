@@ -68,16 +68,21 @@ public class HexPlateau extends JPanel {
                                         hexCase.getUnite().setAAgitCeTour(true);
                                         rendreCasesAutourVisibles(i, j, joueurActuel);
                                         repaint();
+                                    }else{
+                                        JOptionPane.showMessageDialog(null, "respectez votre limite a gauche!");
                                     }
                                     
                                 }else if(partie.getToursInd()%2 == 0){
-                                    if(j >= (plateau.getColonnes()-3)){
+                                    if(j >= (plateau.getColonnes()-4)){
                                         hexCase.placerUnite(uniteSelectionnee);
                                         uniteSelectionnee = null;
                                         placementNouvelleUnite = false;
                                         hexCase.getUnite().setAAgitCeTour(true);
                                         rendreCasesAutourVisibles(i, j, joueurActuel);
                                         repaint();
+                                    }
+                                    else{
+                                        JOptionPane.showMessageDialog(null, "respectez votre limite a droite!");
                                     }
                                 }
                                 
