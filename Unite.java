@@ -11,6 +11,7 @@ public abstract class Unite {
     protected String nom;
     protected List<Arme> armes;
     protected boolean aAgitCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
+    protected Joueur proprietaire;
 
     public Unite() {
         this.armes = new ArrayList<>();
@@ -122,5 +123,11 @@ public abstract class Unite {
 
     public boolean getAAgitCeTour() {
         return aAgitCeTour;
+    }
+    public Joueur getProprietaire() {
+        return proprietaire;
+    }
+    public void setProprietaire(Joueur proprietaire) {
+        this.proprietaire = proprietaire;
     }
 }

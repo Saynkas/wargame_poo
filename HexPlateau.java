@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-
 import javax.swing.*;
 
 public class HexPlateau extends JPanel {
@@ -104,7 +103,7 @@ public class HexPlateau extends JPanel {
                     }
                 }
             }
-        }
+    }
 
     // Calcul des cases accessibles et mises en cache (avec Djikstra)
     private void calculerCasesAccessibles() {
@@ -212,10 +211,10 @@ public class HexPlateau extends JPanel {
     
                 g2d.setColor(Color.BLACK);
                 g2d.draw(hex);
-
+                Joueur joueurActuel = partie.getJoueurActuel();
                 hexCase.dessinerUnite(g2d, center.x, center.y);
 
-                Joueur joueurActuel = partie.getJoueurActuel();
+                
                 if (!hexCase.estVisiblePour(joueurActuel)) {
                     Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
                     g2d.setColor(brouillard);
@@ -253,6 +252,5 @@ public class HexPlateau extends JPanel {
         }
     }
     
-
 }
 

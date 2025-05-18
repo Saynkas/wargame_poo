@@ -612,9 +612,11 @@ public class FenetrePrincipal extends JFrame {
                 InfanterieLourde unitIL = new InfanterieLourde();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitIL);
+                    unitIL.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitIL);
+                    unitIL.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitIL);
                 break;
@@ -622,9 +624,11 @@ public class FenetrePrincipal extends JFrame {
                 Archer unitA = new Archer();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitA);
+                    unitA.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitA);
+                    unitA.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitA);
                 break;
@@ -632,9 +636,11 @@ public class FenetrePrincipal extends JFrame {
                 Mage unitM = new Mage();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitM);
+                    unitM.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitM);
+                    unitM.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitM);
                 break;
@@ -642,9 +648,11 @@ public class FenetrePrincipal extends JFrame {
                 InfanterieLegere unitILe = new InfanterieLegere();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitILe);
+                    unitILe.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitILe);
+                    unitILe.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitILe);
                 break;
@@ -652,9 +660,11 @@ public class FenetrePrincipal extends JFrame {
                 Cavalerie unitC = new Cavalerie();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitC);
+                    unitC.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitC);
+                    unitC.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitC);
                 break;

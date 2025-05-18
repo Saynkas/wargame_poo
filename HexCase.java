@@ -93,19 +93,38 @@ public class HexCase{
     }
 
     private String getImagePathForUnit(Unite unite) {
+        String path = unite.getProprietaire().getId() == 1 ? "Joueur1" : "Joueur2";
+
         // Retourne le chemin de l'image en fonction du type d'unité
-        if (unite instanceof InfanterieLourde) {
-            return "./assets/InfanterieLourde.png";
-        } else if (unite instanceof Archer) {
-            return "./assets/Archer.png";
-        } else if (unite instanceof Mage) {
-            return "./assets/Mage.png";
-        } else if (unite instanceof InfanterieLegere) {
-            return "./assets/InfanterieLegere.png";
-        } else if (unite instanceof Cavalerie) {
-            return "./assets/Cavalerie.png";
-        } else {
-            return "./assets/error.png"; // Image par défaut
+        if (path.equals("Joueur1")) {
+            if (unite instanceof InfanterieLourde) {
+                return "./assets/Joueur1/InfanterieLourde.png";
+            } else if (unite instanceof Archer) {
+                return "./assets/Joueur1/Archer.png";
+            } else if (unite instanceof Mage) {
+                return "./assets/Joueur1/Mage.png";
+            } else if (unite instanceof InfanterieLegere) {
+                return "./assets/Joueur1/InfanterieLegere.png";
+            } else if (unite instanceof Cavalerie) {
+                return "./assets/Joueur1/Cavalerie.png";
+            } else {
+                return "./assets/error.png"; // Image par défaut
+            }
+        }
+        else {
+            if (unite instanceof InfanterieLourde) {
+                return "./assets/Joueur2/InfanterieLourde.png";
+            } else if (unite instanceof Archer) {
+                return "./assets/Joueur2/Archer.png";
+            } else if (unite instanceof Mage) {
+                return "./assets/Joueur2/Mage.png";
+            } else if (unite instanceof InfanterieLegere) {
+                return "./assets/Joueur2/InfanterieLegere.png";
+            } else if (unite instanceof Cavalerie) {
+                return "./assets/Joueur2/Cavalerie.png";
+            } else {
+                return "./assets/error.png"; // Image par défaut
+            }
         }
     }
 }
