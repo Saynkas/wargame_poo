@@ -59,13 +59,28 @@ public class HexPlateau extends JPanel {
 
                         if (placementNouvelleUnite) {
                             if (!hexCase.estOccupee()) {
-                                hexCase.placerUnite(uniteSelectionnee);
-                                uniteSelectionnee = null;
-                                placementNouvelleUnite = false;
-                                hexCase.getUnite().setAAgitCeTour(true);
-                                rendreCasesAutourVisibles(i, j, joueurActuel);
+                                if(partie.getToursInd()%2 == 1)
+                                {
+                                    if(j < 3){
+                                        hexCase.placerUnite(uniteSelectionnee);
+                                        uniteSelectionnee = null;
+                                        placementNouvelleUnite = false;
+                                        hexCase.getUnite().setAAgitCeTour(true);
+                                        rendreCasesAutourVisibles(i, j, joueurActuel);
+                                        repaint();
+                                    }
+                                    
+                                }else if(partie.getToursInd()%2 == 0){
+                                    if(j > (plateau.getColonnes()-3)){
+                                        hexCase.placerUnite(uniteSelectionnee);
+                                        uniteSelectionnee = null;
+                                        placementNouvelleUnite = false;
+                                        hexCase.getUnite().setAAgitCeTour(true);
+                                        rendreCasesAutourVisibles(i, j, joueurActuel);
+                                        repaint();
+                                    }
+                                }
                                 
-                                repaint();
                             }
                             return;
                         } else if (hexCase.estOccupee() && !estEntrainDeplace) {

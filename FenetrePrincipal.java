@@ -581,8 +581,6 @@ public class FenetrePrincipal extends JFrame {
         mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);  // Affiche les unités de joueur 1 au début
 
         mainGamePanel.add(hexPlateau, BorderLayout.CENTER);
-        
-
         // Configuration finale
         jeuPanel.add(topPanel, BorderLayout.NORTH);
         jeuPanel.add(mainGamePanel, BorderLayout.CENTER);
