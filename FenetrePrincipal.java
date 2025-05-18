@@ -498,7 +498,7 @@ public class FenetrePrincipal extends JFrame {
         JLabel explicationPrep = new JLabel("Phase de préparation : chaque joueur peut mettre autant d'unités qu'il veut, là où il veut, puis cliquer sur le bouton de démarrage à droite quand l'organisation des unités est satisfaisante.");
         explicationPrep.setForeground(Color.WHITE);
         explicationPrep.setFont(new Font("Serif", Font.BOLD, 13));
-        topPanel.add(explicationPrep);
+        //topPanel.add(explicationPrep);
 
         // Explication de la phase de jeu
         JLabel explicationJeu = new JLabel("Phase de jeu : chaque joueur peut utiliser ses unités comme il le souhaite, et son tour sera terminé dès qu'aucune de ses unités ne peut bouger, ou bien prématurément en appuyant sur le bouton à droite.");
@@ -517,36 +517,71 @@ public class FenetrePrincipal extends JFrame {
 
         // Bouton de fin de tour
         buttonEndTurn.addActionListener(e -> {
-            partie.setToursInd(partie.getToursInd()+1);
-            int joueur = 2;
-            if (partie.getToursInd() % 2 == 1) {
-                joueur = 1;
-                partie.setTurnNumber(partie.getTurnNumber()+1);
+            partie.setToursInd(partie.getToursInd() + 1);
+        
+            mainGamePanel.remove(leftUnitsPanel);
+            mainGamePanel.remove(rightUnitsPanel);
+            if(partie.getToursInd() <= 2){
+                if (partie.getToursInd() % 2 == 1) {
+                    // Tour du joueur 1
+                    mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+                } else {
+                    // Tour du joueur 2
+                    mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
+                }
+            }else{
+                partie.setPartieCommence(true);
+                mainGamePanel.remove(leftUnitsPanel);
+                mainGamePanel.remove(rightUnitsPanel);
+                topPanel.remove(explicationPrep);
+                
+                // Tu peux remettre l’explication du jeu ici si besoin
+                // topPanel.add(explicationJeu);
+            
+                mainGamePanel.revalidate();
+                mainGamePanel.repaint();
+            
+                endTurn(1, 1, partie);
             }
-
+            mainGamePanel.revalidate();
+            mainGamePanel.repaint();
+        
+            int joueur = (partie.getToursInd() % 2 == 1) ? 1 : 2;
+            if (joueur == 1) {
+                partie.setTurnNumber(partie.getTurnNumber() + 1);
+            }
+        
             endTurn(joueur, partie.getTurnNumber(), partie);
         });
 
         // Création du bouton pour démarrer la partie
         JButton startGame = new JButton("Démarrer la partie !");
-        startGame.addActionListener(e-> {
+        startGame.addActionListener(e -> {
             partie.setPartieCommence(true);
             mainGamePanel.remove(leftUnitsPanel);
             mainGamePanel.remove(rightUnitsPanel);
             topPanel.remove(explicationPrep);
             topPanel.remove(startGame);
-            topPanel.add(explicationJeu);
-            topPanel.add(buttonEndTurn);
+            
+            // Tu peux remettre l’explication du jeu ici si besoin
+            // topPanel.add(explicationJeu);
+        
+            mainGamePanel.revalidate();
+            mainGamePanel.repaint();
+        
             endTurn(1, 1, partie);
-            revalidate();
         });
-        topPanel.add(startGame);
-
+        
+        //topPanel.add(startGame);
+        topPanel.add(buttonEndTurn);
 
         // Ajout des composants
-        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+
+        
+        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);  // Affiche les unités de joueur 1 au début
+
         mainGamePanel.add(hexPlateau, BorderLayout.CENTER);
-        mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
+        
 
         // Configuration finale
         jeuPanel.add(topPanel, BorderLayout.NORTH);
