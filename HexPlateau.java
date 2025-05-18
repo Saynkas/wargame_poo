@@ -100,9 +100,45 @@ public class HexPlateau extends JPanel {
                                 }
                             
                         }
+                        if (estEntrainDeplace && hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))){
+                            Unite cible = hexCase.getUnite();
+                            if (cible.getProprietaire() != uniteSelectionnee.getProprietaire()) {
+                                // Calculer la distance entre les unités
+                                int distance = calculerDistance(ligneInitial, colonneInitial, i, j);
+                                
+                                // Lancer l'attaque
+                                uniteSelectionnee.attaquer(
+                                    cible, 
+                                    hexCase.getTerrain(), 
+                                    distance
+                                );
+                                
+                                // Vérifier si la cible est morte
+                                if (!cible.estVivant()) {
+                                    hexCase.retirerUnite();
+                                    plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                    hexCase.placerUnite(uniteSelectionnee);
+                                }
+                                System.out.println("Attaque réussie !");
+                                System.out.println("Unité attaquante : " + uniteSelectionnee.getNom());
+                                System.out.println("Unité cible : " + cible.getNom());
+                                System.out.println("Dégâts infligés : " + uniteSelectionnee.calculerDegats(cible, hexCase.getTerrain(), distance));
+                                
+                                estEntrainDeplace = false;
+                                casesAccessiblesCache = null;
+                                repaint();
+                            }
+                        }   
                     }
                 }
             }
+    }
+    private int calculerDistance(int x1, int y1, int x2, int y2) {
+        // Implémentation simple de distance hexagonale
+        // (Adaptée à votre système de coordonnées)
+        int dx = Math.abs(x1 - x2);
+        int dy = Math.abs(y1 - y2);
+        return (dx + dy + Math.abs(dx - dy)) / 2;
     }
 
     // Calcul des cases accessibles et mises en cache (avec Djikstra)
