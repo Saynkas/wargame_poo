@@ -543,6 +543,7 @@ public class FenetrePrincipal extends JFrame {
             
                 endTurn(1, 1, partie);
             }
+            
             mainGamePanel.revalidate();
             mainGamePanel.repaint();
         
@@ -578,7 +579,9 @@ public class FenetrePrincipal extends JFrame {
         // Ajout des composants
 
         
-        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);  // Affiche les unités de joueur 1 au début
+        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+        mainGamePanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+
 
         mainGamePanel.add(hexPlateau, BorderLayout.CENTER);
         // Configuration finale

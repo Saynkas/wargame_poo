@@ -61,7 +61,7 @@ public class HexPlateau extends JPanel {
                             if (!hexCase.estOccupee()) {
                                 if(partie.getToursInd()%2 == 1)
                                 {
-                                    if(j < 3){
+                                    if(j <= 3){
                                         hexCase.placerUnite(uniteSelectionnee);
                                         uniteSelectionnee = null;
                                         placementNouvelleUnite = false;
@@ -71,7 +71,7 @@ public class HexPlateau extends JPanel {
                                     }
                                     
                                 }else if(partie.getToursInd()%2 == 0){
-                                    if(j > (plateau.getColonnes()-3)){
+                                    if(j >= (plateau.getColonnes()-3)){
                                         hexCase.placerUnite(uniteSelectionnee);
                                         uniteSelectionnee = null;
                                         placementNouvelleUnite = false;
@@ -270,6 +270,26 @@ public class HexPlateau extends JPanel {
                     Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
                     g2d.setColor(brouillard);
                     g2d.fillPolygon(hex);
+                }
+
+                // limite du joueur 1
+                if (col == 3) {
+                    g2d.setColor(Color.RED);
+                    Point p1 = hex.getBounds().getLocation(); // coin en haut à gauche
+                    int x1 = p1.x + hex.getBounds().width;
+                    int y1 = p1.y;
+                    int y2 = y1 + hex.getBounds().height;
+                    g2d.drawLine(x1, y1+10, x1, y2);
+                }
+    
+                // limite du joueur 2
+                if (col == plateau.getColonnes() - 4) {
+                    g2d.setColor(Color.BLUE);
+                    Point p1 = hex.getBounds().getLocation();
+                    int x1 = p1.x;
+                    int y1 = p1.y;
+                    int y2 = y1 + hex.getBounds().height;
+                    g2d.drawLine(x1, y1+10, x1, y2);
                 }
             }
         }
