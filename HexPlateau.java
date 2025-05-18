@@ -126,7 +126,6 @@ public class HexPlateau extends JPanel {
                         } 
                         // Sinon si la case ciblée est libre et accessible
                         else if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
-
                             // Déplacer l’unité vers la nouvelle case
                             plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                             hexCase.placerUnite(uniteSelectionnee);
@@ -237,8 +236,10 @@ public class HexPlateau extends JPanel {
                     
                     // Si la case est 1. libre, 2. dans la distance atteignable par l'unité et 
                     // 3. la case n'est pas dans le cache OU on a trouvé un chemin plus court que la valeur déjà en cache
-                    if (!hexCase.estOccupee() && totalCost <= uniteSelectionnee.getDeplacement() && 
-                        (!casesAccessiblesCache.containsKey(key) || totalCost < casesAccessiblesCache.get(key))) {
+                    if (( !hexCase.estOccupee() || hexCase.contientUniteEnnemie(uniteSelectionnee) )
+                        && totalCost <= uniteSelectionnee.getDeplacement()
+                        && (!casesAccessiblesCache.containsKey(key) || totalCost < casesAccessiblesCache.get(key))) {
+
                         // On rajoute la case au cache avec ses coordonnées et son coût d'accès                        
                         casesAccessiblesCache.put(key, totalCost);
                         // On rajoute cette case à la file

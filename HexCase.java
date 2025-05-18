@@ -147,4 +147,8 @@ public class HexCase{
             }
         }
     }
+    public boolean contientUniteEnnemie(Unite unite) {
+        return estOccupee() && getUnite().getProprietaire() != unite.getProprietaire();
+    }
+
 }
