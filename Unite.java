@@ -64,6 +64,10 @@ public abstract class Unite {
     public boolean estVivant() {
         return pointsDeVie > 0;
     }
+    
+    public int getPointsDeVieMax() {
+        return pointsDeVieMax;
+    }
 
     public int getPointsDeVie() {
         return pointsDeVie;

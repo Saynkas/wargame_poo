@@ -82,6 +82,26 @@ public class HexCase{
                 int imgHeight = 30;
                 g.drawImage(img, x - imgWidth/2, y - imgHeight/2, imgWidth, imgHeight, null);
                 
+                // Dessine la barre de vie
+                int barWidth = 30; // Largeur de la barre de vie moins que la largeur du hexagone
+                int barHeight = 5;// Hauteur de la barre de vie 5 car la barre est placée sous l'image
+                int barX = x - barWidth/2; // Centrer la barre de vie sous l'image
+                int barY = y + imgHeight/2 + 2; // Position sous l'image en fonction de la hauteur de l'image
+                
+                // rouge qui représente la difference entre les PV max et les PV actuels
+                g.setColor(Color.RED);
+                g.fillRect(barX, barY, barWidth, barHeight); // rectangle rouge 
+                
+                // Partie verte (PV actuels)
+                double pvRatio = (double)unite.getPointsDeVie() / unite.getPointsDeVieMax();
+                int greenWidth = (int)(barWidth * pvRatio);
+                g.setColor(Color.GREEN);
+                g.fillRect(barX, barY, greenWidth, barHeight);
+                
+                // Contour de la barre
+                g.setColor(Color.BLACK);
+                g.drawRect(barX, barY, barWidth, barHeight);
+                
             } catch (Exception e) {
                 // Fallback si l'image n'est pas trouvée
                 g.setColor(Color.RED);
