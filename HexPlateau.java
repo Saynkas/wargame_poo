@@ -172,7 +172,8 @@ public class HexPlateau extends JPanel {
                                 System.out.println("Unité attaquante : " + uniteSelectionnee.getNom());
                                 System.out.println("Unité cible : " + cible.getNom());
                                 System.out.println("Dégâts infligés : " + uniteSelectionnee.calculerDegats(cible, hexCase.getTerrain(), distance));
-
+                                
+                                uniteSelectionnee.setAAgitCeTour(true);
                                 estEntrainDeplace = false;
                                 casesAccessiblesCache = null;
                                 repaint();

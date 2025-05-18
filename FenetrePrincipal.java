@@ -449,6 +449,11 @@ public class FenetrePrincipal extends JFrame {
 
         if (joueur == 1) partie.getJoueur1().resetAAgitCeTour();
         else partie.getJoueur2().resetAAgitCeTour();
+        Joueur joueurActuel = partie.getJoueurActuel();
+        for (Unite unite : joueurActuel.getUnites()) {
+            unite.recupererPV();
+            unite.reinitialiserTour();
+        }
       //  partie.getJoueur1().resetAAgitCeTour();
        // partie.getJoueur2().resetAAgitCeTour();
     }
