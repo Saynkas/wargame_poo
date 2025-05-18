@@ -70,24 +70,28 @@ public class HexPlateau extends JPanel {
 
                             // Tour impair -> placement possible dans les colonnes < 3
                             if (partie.getToursInd() % 2 == 1) {
-                                if (j < 3) {
+                                if (j <= 3) {
                                     hexCase.placerUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
                                     hexCase.getUnite().setAAgitCeTour(true);
                                     rendreCasesAutourVisibles(i, j, joueurActuel);
                                     repaint();
+                                }else{
+                                    JOptionPane.showMessageDialog(null, "respecte les limite a gauche");
                                 }
                             } 
                             // Tour pair -> placement possible dans les colonnes > (total - 3)
                             else if (partie.getToursInd() % 2 == 0) {
-                                if (j > (plateau.getColonnes() - 3)) {
+                                if (j >= (plateau.getColonnes() - 4)) {
                                     hexCase.placerUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
                                     hexCase.getUnite().setAAgitCeTour(true);
                                     rendreCasesAutourVisibles(i, j, joueurActuel);
                                     repaint();
+                                }else{
+                                    JOptionPane.showMessageDialog(null, "respecte les limite a droite");
                                 }
                             }
 
