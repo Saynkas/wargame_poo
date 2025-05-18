@@ -1,10 +1,6 @@
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.time.format.TextStyle;
-
-import java.util.ArrayList;
-
 import javax.sound.sampled.*;
 import javax.swing.*;
 
@@ -560,35 +556,37 @@ public class FenetrePrincipal extends JFrame {
     }
 
     private JPanel createUnitsPanel(String side) {
-        JPanel unitsPanel = new JPanel();
-        unitsPanel.setLayout(new BoxLayout(unitsPanel, BoxLayout.Y_AXIS));
-        unitsPanel.setBackground(new Color(240, 240, 240));
-        unitsPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+    JPanel unitsPanel = new JPanel();
+    unitsPanel.setLayout(new BoxLayout(unitsPanel, BoxLayout.Y_AXIS));
+    unitsPanel.setBackground(new Color(240, 240, 240));
+    unitsPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
-        String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
-        String[] unitImages = {
-            "./assets/InfanterieLourde.png",
-            "./assets/Archer.png",
-            "./assets/Mage.png",
-            "./assets/InfanterieLegere.png",
-            "./assets/Cavalerie.png"
-        };
+    // Définir le dossier joueur
+    String joueurPath = side.equals("left") ? "Joueur1" : "Joueur2";
 
-        for (int i = 0; i < unitTypes.length; i++) {
-            final int index = i;
-            JButton unitBtn = createUnitButton(unitTypes[index], unitImages[index]);
-            unitBtn.addActionListener(e -> {
-                selectUnit(unitTypes[index], side);
-                JOptionPane.showMessageDialog(this, unitTypes[index] + " sélectionnée !");
-            });
-            unitsPanel.add(unitBtn);
-            if (index < unitTypes.length - 1) {
-                unitsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-            }
+    // Noms des unités et des images (mêmes noms pour tous, seul le dossier change)
+    String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
+    String[] imageNames = {"InfanterieLourde", "Archer", "Mage", "InfanterieLegere", "Cavalerie"};
+
+    for (int i = 0; i < unitTypes.length; i++) {
+        final int index = i;
+        String imagePath = "./assets/" + joueurPath + "/" + imageNames[i] + ".png";
+
+        JButton unitBtn = createUnitButton(unitTypes[i], imagePath);
+        unitBtn.addActionListener(e -> {
+            selectUnit(unitTypes[index], side);
+            JOptionPane.showMessageDialog(this, unitTypes[index] + " sélectionnée !");
+        });
+
+        unitsPanel.add(unitBtn);
+        if (index < unitTypes.length - 1) {
+            unitsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         }
-
-        return unitsPanel;
     }
+
+    return unitsPanel;
+    }
+
 
     private JButton createUnitButton(String unitName, String imagePath) {
         JButton button = new JButton(unitName);
