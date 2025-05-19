@@ -2,6 +2,10 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.format.TextStyle;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+import java.awt.Dimension;
+
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -58,10 +62,8 @@ public class FenetrePrincipal extends JFrame {
         
         Plateau plateau = new Plateau(12, 18);
         hexPlateau = new HexPlateau(plateau);
-        //JPanel jeuPanel = creeJeuPanel(plateau);
 
         mainPanel.add(menuPanel, "menu");
-        //mainPanel.add(jeuPanel, "plateau");
         mainPanel.add(lobbySetupPanel, "lobby");
 
         add(mainPanel);
@@ -456,28 +458,66 @@ public class FenetrePrincipal extends JFrame {
         JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
         jeuPanel.setLayout(new BorderLayout());
 
-        // Labels pour afficher les pseudos des joueurs
-        JLabel labelJoueur1 = new JLabel("👑 " + pseudoJoueur1);
+        // Création du label pseudo joueur 1 dans une bannière opaque
+        JLabel labelJoueur1 = new JLabel(pseudoJoueur1, SwingConstants.CENTER);
         labelJoueur1.setFont(new Font("Serif", Font.BOLD, 20));
-        labelJoueur1.setForeground(Color.WHITE);
-        labelJoueur1.setHorizontalAlignment(SwingConstants.CENTER);
+        labelJoueur1.setForeground(new Color(0xEFC870)); // Doré clair
 
-        JLabel labelJoueur2 = new JLabel(pseudoJoueur2 + " 👑");
+        JPanel bannièreJoueur1 = new JPanel();
+        bannièreJoueur1.setBackground(new Color(0x581F0E)); // Fond brun foncé
+        bannièreJoueur1.setOpaque(true);
+        bannièreJoueur1.setLayout(new BorderLayout());
+        bannièreJoueur1.add(labelJoueur1, BorderLayout.CENTER);
+
+        // Création du label pseudo joueur 2 dans une bannière opaque
+        JLabel labelJoueur2 = new JLabel(pseudoJoueur2, SwingConstants.CENTER);
         labelJoueur2.setFont(new Font("Serif", Font.BOLD, 20));
-        labelJoueur2.setForeground(Color.WHITE);
-        labelJoueur2.setHorizontalAlignment(SwingConstants.CENTER);
+        labelJoueur2.setForeground(new Color(0xEFC870)); // Doré clair
 
-        // Panels pour positionner les labels à gauche et à droite
+        JPanel bannièreJoueur2 = new JPanel();
+        bannièreJoueur2.setBackground(new Color(0x581F0E)); // Fond brun foncé
+        bannièreJoueur2.setOpaque(true);
+        bannièreJoueur2.setLayout(new BorderLayout());
+        bannièreJoueur2.add(labelJoueur2, BorderLayout.CENTER);
+
+        // Création de bordures "médiévales"
+        Border bordureJoueur1 = BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(139, 69, 19), 3),
+            "Seigneur de l'Ouest", TitledBorder.CENTER, TitledBorder.TOP,
+            new Font("Serif", Font.BOLD, 14), new Color(0xEFC870) // Doré clair pour le titre
+        );
+
+        Border bordureJoueur2 = BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(139, 69, 19), 3),
+            "Seigneur de l'Est", TitledBorder.CENTER, TitledBorder.TOP,
+            new Font("Serif", Font.BOLD, 14), new Color(0xEFC870)
+        );
+
+        // Panels individuels pour chaque joueur
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setOpaque(false);
-        leftPanel.add(labelJoueur1, BorderLayout.CENTER);
+        leftPanel.setBorder(bordureJoueur1);
+        leftPanel.setPreferredSize(new Dimension(200, 60));
+        leftPanel.add(bannièreJoueur1, BorderLayout.CENTER);
 
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.setOpaque(false);
-        rightPanel.add(labelJoueur2, BorderLayout.CENTER);
+        rightPanel.setBorder(bordureJoueur2);
+        rightPanel.setPreferredSize(new Dimension(200, 60));
+        rightPanel.add(bannièreJoueur2, BorderLayout.CENTER);
 
-        jeuPanel.add(leftPanel, BorderLayout.WEST);
-        jeuPanel.add(rightPanel, BorderLayout.EAST);
+        // Panel global pour contenir les deux (en bas de l'écran)
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setOpaque(false);
+        bottomPanel.add(leftPanel, BorderLayout.WEST);
+        bottomPanel.add(rightPanel, BorderLayout.EAST);
+
+        // Ajout au panel principal
+        jeuPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+
+
+
 
 
         // Panel du haut avec bouton retour
