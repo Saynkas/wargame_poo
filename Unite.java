@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public abstract class Unite {
     protected int pointsDeVie;
@@ -11,6 +12,7 @@ public abstract class Unite {
     protected String nom;
     protected List<Arme> armes;
     protected boolean aAgitCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
+    protected Joueur proprietaire;
 
     public Unite() {
         this.armes = new ArrayList<>();
@@ -39,6 +41,12 @@ public abstract class Unite {
 
     public void attaquer(Unite cible, TypeDeTerrain terrain, int distance) {
         int degats = calculerDegats(cible, terrain, distance);
+        
+        // Ajout d'un facteur aléatoire (±50%)
+        Random rand = new Random();
+        int variation = (int)(degats * 0.5 * (rand.nextDouble() - 0.5));
+        degats = Math.max(1, degats + variation); // Au moins 1 dégât
+        
         if (degats > 0) {
             cible.subirDegats(degats);
             this.aAgitCeTour = true;
@@ -62,6 +70,10 @@ public abstract class Unite {
 
     public boolean estVivant() {
         return pointsDeVie > 0;
+    }
+
+    public int getPointsDeVieMax() {
+        return pointsDeVieMax;
     }
 
     public int getPointsDeVie() {
@@ -122,5 +134,11 @@ public abstract class Unite {
 
     public boolean getAAgitCeTour() {
         return aAgitCeTour;
+    }
+    public Joueur getProprietaire() {
+        return proprietaire;
+    }
+    public void setProprietaire(Joueur proprietaire) {
+        this.proprietaire = proprietaire;
     }
 }

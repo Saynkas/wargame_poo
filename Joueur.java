@@ -1,11 +1,12 @@
 import java.util.ArrayList;
-import java.util.List;
 
 public class Joueur {
+    private int id;
     private String nom;
-    private List<Unite> unites;
+    private ArrayList<Unite> unites;
 
-    public Joueur(String nom) {
+    public Joueur(int id, String nom) {
+        this.id = id;
         this.nom = nom;
         this.unites = new ArrayList<>();
     }
@@ -14,9 +15,15 @@ public class Joueur {
         unites.add(unite);
     }
 
-    public List<Unite> getUnites() {
+    public ArrayList<Unite> getUnites() {
         return unites;
     }
+
+    public int getId(){
+        return id;
+    }
+
+    
 
     public boolean aDesUnitesVivantes() {
         for (Unite unite : unites) {
@@ -25,6 +32,21 @@ public class Joueur {
             }
         }
         return false;
+    }
+
+    public boolean peutEncoreJouer() {
+        for (Unite u : unites) {
+            if (!u.getAAgitCeTour()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void resetAAgitCeTour() {
+        for (Unite u : unites) {
+            u.setAAgitCeTour(false);
+        }
     }
 
     public String getNom() {

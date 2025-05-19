@@ -1,8 +1,8 @@
 public enum TypeDeTerrain {
     PLAINE(0, 0, 1),
     FORET(1, 1, 2),
-    MONTAGNE(2, 3, 3),
-    COLLINE(1, 2, 2),
+    DESERT(2, 3, 3),
+    RIVIERE(1, 2, 2),
     FORTERESSE(3, 5, 1);
 
     private int bonusAttaque;
