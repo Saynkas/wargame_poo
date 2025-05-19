@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-
 import javax.swing.*;
 
 public class HexPlateau extends JPanel {
@@ -17,6 +16,9 @@ public class HexPlateau extends JPanel {
     private int colonneInitial =-1;
     private boolean placementNouvelleUnite;
     private Map<Point, Integer> casesAccessiblesCache;
+    private Partie partie;
+    private JButton buttonEndTurn;
+    private HexCase oldHexCase;
 
     //unite selectionnee par le joueur
     public void setUniteSelectionnee(Unite unite) {
@@ -25,7 +27,9 @@ public class HexPlateau extends JPanel {
     }
 
 
-    public HexPlateau(Plateau plateau){
+    public HexPlateau(Plateau plateau, Partie partie, JButton buttonEndTurn){
+        this.buttonEndTurn = buttonEndTurn;
+        this.partie = partie;
         this.plateau = plateau;
         this.uniteSelectionnee = null;
         this.placementNouvelleUnite = false;
@@ -43,47 +47,156 @@ public class HexPlateau extends JPanel {
 
     //interaction avec le plateau
     private void gererClick(int x, int y) {
-        for(int i = 0; i < plateau.getLignes(); i++) {
-            for(int j = 0; j < plateau.getColonnes(); j++) {
+        Joueur joueurActuel = partie.getJoueurActuel();
+
+        // Parcours de toutes les cases du plateau
+        for (int i = 0; i < plateau.getLignes(); i++) {
+            for (int j = 0; j < plateau.getColonnes(); j++) {
+
+                // Calcul du centre du hexagone et création du polygone correspondant
                 Point center = hexToPixel(j, i);
                 Polygon hex = createHexagon(center.x, center.y);
 
-                if(hex.contains(x,y)){
+                // Vérification si le clic est à l’intérieur de ce hexagone
+                if (hex.contains(x, y)) {
 
                     HexCase hexCase = plateau.getCase(i, j);
-                    
+
+                    // Si on est en phase de placement d’une nouvelle unité
                     if (placementNouvelleUnite) {
+
+                        // La case doit être vide pour placer l’unité
                         if (!hexCase.estOccupee()) {
-                            hexCase.placerUnite(uniteSelectionnee);
-                            uniteSelectionnee = null;
-                            placementNouvelleUnite = false;
-                            repaint();
+
+                            // Tour impair -> placement possible dans les colonnes < 3
+                            if (partie.getToursInd() % 2 == 1) {
+                                if (j <= 3) {
+                                    hexCase.placerUnite(uniteSelectionnee);
+                                    uniteSelectionnee = null;
+                                    placementNouvelleUnite = false;
+                                    hexCase.getUnite().setAAgitCeTour(true);
+                                    rendreCasesAutourVisibles(i, j, joueurActuel);
+                                    repaint();
+                                }else{
+                                    JOptionPane.showMessageDialog(null, "respecte les limite a gauche");
+                                }
+                            } 
+                            // Tour pair -> placement possible dans les colonnes > (total - 3)
+                            else if (partie.getToursInd() % 2 == 0) {
+                                if (j >= (plateau.getColonnes() - 4)) {
+                                    hexCase.placerUnite(uniteSelectionnee);
+                                    uniteSelectionnee = null;
+                                    placementNouvelleUnite = false;
+                                    hexCase.getUnite().setAAgitCeTour(true);
+                                    rendreCasesAutourVisibles(i, j, joueurActuel);
+                                    repaint();
+                                }else{
+                                    JOptionPane.showMessageDialog(null, "respecte les limite a droite");
+                                }
+                            }
+
                         }
-                        return;
-                    }
+                        return; // Fin du traitement si on était en placement
+                    } 
+                    // Si la case est occupée et on n’est pas en train de déplacer une unité
                     else if (hexCase.estOccupee() && !estEntrainDeplace) {
-                        if (!hexCase.getUnite().getAAgitCeTour()) {
+
+                        // Vérifier que l’unité n’a pas déjà agi ce tour
+                        // Et que c’est bien une unité du joueur actif
+                        if (!hexCase.getUnite().getAAgitCeTour() && 
+                            ((partie.getJoueur1().getUnites().contains(hexCase.getUnite()) && partie.getToursInd() % 2 == 1) ||
+                            (partie.getJoueur2().getUnites().contains(hexCase.getUnite()) && partie.getToursInd() % 2 == 0))) {
+
+                            // Sélectionner cette unité pour déplacement
                             uniteSelectionnee = hexCase.getUnite();
                             ligneInitial = i;
                             colonneInitial = j;
                             estEntrainDeplace = true;
+                            oldHexCase = hexCase;
                             calculerCasesAccessibles();
+                            rendreCasesAutourVisibles(i, j, joueurActuel);
                             repaint();
                         }
-                    }
+                    } 
+                    // Si on est en train de déplacer une unité
                     else if (estEntrainDeplace) {
-                        if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
+
+                        // Si on reclique sur la case d’origine, annuler le déplacement
+                        if (hexCase == oldHexCase) {
+                            estEntrainDeplace = false;
+                            casesAccessiblesCache = null;
+                            rendreCasesAutourVisibles(i, j, joueurActuel);
+                            repaint();
+                        } 
+                        // Sinon si la case ciblée est libre et accessible
+                        else if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
+                            // Déplacer l’unité vers la nouvelle case
                             plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                             hexCase.placerUnite(uniteSelectionnee);
                             uniteSelectionnee.setAAgitCeTour(true);
                             estEntrainDeplace = false;
                             casesAccessiblesCache = null;
+                            rendreCasesAutourVisibles(i, j, joueurActuel);
                             repaint();
+
+                            // Vérifier si le joueur actif ne peut plus jouer et si la partie a commencé
+                            if ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer()) ||
+                                (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()) &&
+                                partie.isPartieCommence()) {
+
+                                buttonEndTurn.doClick(); // Fin du tour automatique
+                            }
                         }
+                        // Gestion de l’attaque si on est en train de déplacer une unité
+                        // et que la case ciblée est occupée par une unité ennemie accessible
+                        if (hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
+
+                            System.out.println("Attaque en cours...");
+
+                            Unite cible = hexCase.getUnite();
+
+                            // Vérifier que la cible appartient à l’adversaire
+                            if (cible.getProprietaire() != uniteSelectionnee.getProprietaire()) {
+
+                                // Calculer la distance entre l’unité sélectionnée et la cible
+                                int distance = calculerDistance(ligneInitial, colonneInitial, i, j);
+
+                                // Effectuer l’attaque
+                                uniteSelectionnee.attaquer(cible, hexCase.getTerrain(), distance);
+
+                                // Si la cible est morte, la retirer et déplacer l’attaquant à sa place
+                                if (!cible.estVivant()) {
+                                    hexCase.retirerUnite();
+                                    plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                    hexCase.placerUnite(uniteSelectionnee);
+                                }
+
+                                // Affichage console des infos d’attaque
+                                System.out.println("Attaque réussie !");
+                                System.out.println("Unité attaquante : " + uniteSelectionnee.getNom());
+                                System.out.println("Unité cible : " + cible.getNom());
+                                System.out.println("Dégâts infligés : " + uniteSelectionnee.calculerDegats(cible, hexCase.getTerrain(), distance));
+                                
+                                uniteSelectionnee.setAAgitCeTour(true);
+                                estEntrainDeplace = false;
+                                casesAccessiblesCache = null;
+                                repaint();
+                            }
+                        }
+
                     }
+
                 }
             }
         }
+    }
+
+    private int calculerDistance(int x1, int y1, int x2, int y2) {
+        // Implémentation simple de distance hexagonale
+        // (Adaptée à votre système de coordonnées)
+        int dx = Math.abs(x1 - x2);
+        int dy = Math.abs(y1 - y2);
+        return (dx + dy + Math.abs(dx - dy)) / 2;
     }
 
     // Calcul des cases accessibles et mises en cache (avec Djikstra)
@@ -128,8 +241,10 @@ public class HexPlateau extends JPanel {
                     
                     // Si la case est 1. libre, 2. dans la distance atteignable par l'unité et 
                     // 3. la case n'est pas dans le cache OU on a trouvé un chemin plus court que la valeur déjà en cache
-                    if (!hexCase.estOccupee() && totalCost <= uniteSelectionnee.getDeplacement() && 
-                        (!casesAccessiblesCache.containsKey(key) || totalCost < casesAccessiblesCache.get(key))) {
+                    if (( !hexCase.estOccupee() || hexCase.contientUniteEnnemie(uniteSelectionnee) )
+                        && totalCost <= uniteSelectionnee.getDeplacement()
+                        && (!casesAccessiblesCache.containsKey(key) || totalCost < casesAccessiblesCache.get(key))) {
+
                         // On rajoute la case au cache avec ses coordonnées et son coût d'accès                        
                         casesAccessiblesCache.put(key, totalCost);
                         // On rajoute cette case à la file
@@ -192,8 +307,35 @@ public class HexPlateau extends JPanel {
     
                 g2d.setColor(Color.BLACK);
                 g2d.draw(hex);
-
+                Joueur joueurActuel = partie.getJoueurActuel();
                 hexCase.dessinerUnite(g2d, center.x, center.y);
+
+                
+                if (!hexCase.estVisiblePour(joueurActuel)) {
+                    Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
+                    g2d.setColor(brouillard);
+                    g2d.fillPolygon(hex);
+                }
+
+                // limite du joueur 1
+                if (col == 3) {
+                    g2d.setColor(Color.RED);
+                    Point p1 = hex.getBounds().getLocation(); // coin en haut à gauche
+                    int x1 = p1.x + hex.getBounds().width;
+                    int y1 = p1.y;
+                    int y2 = y1 + hex.getBounds().height;
+                    g2d.drawLine(x1, y1+10, x1, y2);
+                }
+    
+                // limite du joueur 2
+                if (col == plateau.getColonnes() - 4) {
+                    g2d.setColor(Color.BLUE);
+                    Point p1 = hex.getBounds().getLocation();
+                    int x1 = p1.x;
+                    int y1 = p1.y;
+                    int y2 = y1 + hex.getBounds().height;
+                    g2d.drawLine(x1, y1+10, x1, y2);
+                }
             }
         }
     }
@@ -212,5 +354,19 @@ public class HexPlateau extends JPanel {
         return false;
     }
 
+    private void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur) {
+        // Rendre la case centrale visible
+        plateau.getCase(ligne, colonne).setVisiblePour(joueur, true);
+    
+        // Parcourir toutes les cases du plateau et tester si elles sont voisines
+        for (int i = 0; i < plateau.getLignes(); i++) {
+            for (int j = 0; j < plateau.getColonnes(); j++) {
+                if (estVoisine(ligne, colonne, i, j)) {
+                    plateau.getCase(i, j).setVisiblePour(joueur, true);
+                }
+            }
+        }
+    }
+    
 }
 

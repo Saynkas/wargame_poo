@@ -1,18 +1,19 @@
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-
 import javax.sound.sampled.*;
 import javax.swing.*;
 
 public class FenetrePrincipal extends JFrame {
 
+    private String pseudoJoueur1;
+    private String pseudoJoueur2;
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private HexPlateau hexPlateau;
     private Clip backgroundClip;
     private Partie partie;
+    private JButton buttonEndTurn = new JButton("Terminer son tour");;
 
     private void playSound(String soundPath) {
         try {
@@ -51,12 +52,17 @@ public class FenetrePrincipal extends JFrame {
         mainPanel.setLayout(cardLayout);
 
         JPanel menuPanel = creeMenuPanel();
+
+        JPanel lobbySetupPanel = creelobbySetupPanel();
+
+
         Plateau plateau = new Plateau(12, 18);
-        hexPlateau = new HexPlateau(plateau);
-        JPanel jeuPanel = creeJeuPanel(plateau);
+        hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn);
+        //JPanel jeuPanel = creeJeuPanel(plateau);
 
         mainPanel.add(menuPanel, "menu");
-        mainPanel.add(jeuPanel, "plateau");
+        //mainPanel.add(jeuPanel, "plateau");
+        mainPanel.add(lobbySetupPanel, "lobby");
 
         add(mainPanel);
         setVisible(true);
@@ -64,6 +70,105 @@ public class FenetrePrincipal extends JFrame {
 
 
     }
+
+    class PseudoDialog extends JDialog {
+        private JTextField joueur1Field;
+        private JTextField joueur2Field;
+        private String joueur1;
+        private String joueur2;
+
+        public PseudoDialog(JFrame parent) {
+            super(parent, "Entrez les pseudos", true);
+            setSize(500, 300);
+            setLocationRelativeTo(parent);
+            setLayout(new BorderLayout());
+
+            JPanel fondPanel = new JPanel() {
+                Image img = new ImageIcon("backGroundImages/parchemin.jpg").getImage();
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                }
+            };
+            fondPanel.setLayout(new GridBagLayout());
+            fondPanel.setOpaque(false);
+
+            Font customFont;
+            try {
+                customFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/police/papyrus.ttf"))
+                                .deriveFont(Font.PLAIN, 18f);
+            } catch (Exception e) {
+                customFont = new Font("Serif", Font.BOLD, 18);
+            }
+
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(10, 10, 10, 10);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel label1 = new JLabel("Pseudo Joueur 1 :");
+            label1.setFont(customFont);
+            label1.setForeground(new Color(91, 62, 29));
+            gbc.gridx = 0; gbc.gridy = 0;
+            fondPanel.add(label1, gbc);
+
+            joueur1Field = new JTextField();
+            joueur1Field.setFont(customFont);
+            joueur1Field.setPreferredSize(new Dimension(200, 30));
+            joueur1Field.setForeground(Color.BLACK);
+            joueur1Field.setBackground(new Color(255, 255, 255));
+            joueur1Field.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            joueur1Field.setOpaque(true);
+
+            gbc.gridx = 1;
+            gbc.gridy = 0;
+            fondPanel.add(joueur1Field, gbc);
+
+
+            JLabel label2 = new JLabel("Pseudo Joueur 2 :");
+            label2.setFont(customFont);
+            label2.setForeground(new Color(91, 62, 29));
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            fondPanel.add(label2, gbc);
+
+            joueur2Field = new JTextField();
+            joueur2Field.setFont(customFont);
+            joueur2Field.setPreferredSize(new Dimension(200, 30));
+            joueur2Field.setForeground(Color.BLACK);
+            joueur2Field.setBackground(new Color(255, 255, 255));
+            joueur2Field.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            joueur2Field.setOpaque(true);
+
+            gbc.gridx = 1;
+            gbc.gridy = 1;
+            fondPanel.add(joueur2Field, gbc);
+
+            JButton validerBtn = new JButton("Valider");
+            validerBtn.setFont(customFont);
+            validerBtn.setBackground(new Color(88, 31, 14));
+            validerBtn.setForeground(new Color(239, 200, 112));
+            validerBtn.addActionListener(e -> {
+                joueur1 = joueur1Field.getText().trim();
+                joueur2 = joueur2Field.getText().trim();
+                if (!joueur1.isEmpty() && !joueur2.isEmpty()) {
+                    dispose();
+                    cardLayout.show(mainPanel, "plateau");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Les deux pseudos sont requis.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
+            gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+            fondPanel.add(validerBtn, gbc);
+
+            setContentPane(fondPanel);
+        }
+
+        public String getJoueur1() { return joueur1; }
+        public String getJoueur2() { return joueur2; }
+    }
+
 
     class FenetreRegles extends JDialog {
 
@@ -174,7 +279,8 @@ public class FenetrePrincipal extends JFrame {
         playButton.addActionListener(e -> {
             playSound("assets/sounds/click_fantasy_ok.wav");
             cardLayout.show(mainPanel, "plateau");
-            partie = new Partie(new Joueur("joueur 1"), new Joueur("joueur 2"));
+            partie = new Partie(new Joueur(1, "joueur 1"), new Joueur(2 , "joueur 2"));
+            cardLayout.show(mainPanel, "lobby");
         });
 
         guideButton.addActionListener(e -> {
@@ -199,6 +305,85 @@ public class FenetrePrincipal extends JFrame {
         panel.add(Box.createVerticalGlue());
 
         return panel;
+    }
+
+    private JPanel creelobbySetupPanel()
+    {
+        JPanel lobbyPanel = new BackGroundPanel("./backGroundImages/carte_choix_jeu.jpg");
+        lobbyPanel.setLayout(new BorderLayout());
+
+        // Chargement du logo comme ImageIcon
+        ImageIcon logoIcon = new ImageIcon("backGroundImages/logo_choix_mode_ok.png");
+        JLabel logoLabel = new JLabel(logoIcon, SwingConstants.CENTER);
+        logoLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
+        logoLabel.setOpaque(false);
+        lobbyPanel.add(logoLabel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+
+
+        JButton pvpButton = createStyledButton("VS Joueur");
+        JButton pvcButton = createStyledButton("VS IA");
+
+
+        pvpButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            PseudoDialog pseudoDialog = new PseudoDialog(this);
+            pseudoDialog.setVisible(true);
+
+            pseudoJoueur1 = pseudoDialog.getJoueur1();
+            pseudoJoueur2 = pseudoDialog.getJoueur2();
+
+            if (pseudoJoueur1 != null && pseudoJoueur2 != null) {
+                System.out.println("Pseudo Joueur 1 : " + pseudoJoueur1);
+                System.out.println("Pseudo Joueur 2 : " + pseudoJoueur2);
+
+                Plateau plateau = new Plateau(12, 18);
+                hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn);
+                JPanel jeuPanel = creeJeuPanel(plateau);
+
+                mainPanel.add(jeuPanel, "plateau");
+                cardLayout.show(mainPanel, "plateau");
+            }
+
+        });
+
+
+
+        pvcButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            JOptionPane.showMessageDialog(null, "pas encore fait");
+        });
+
+
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(pvpButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(100, 0)));
+        buttonPanel.add(pvcButton);
+        buttonPanel.add(Box.createHorizontalGlue());
+
+        JPanel buttonReturnPanel = new JPanel();
+        buttonReturnPanel.setOpaque(false);
+        buttonReturnPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        JButton returnButton = createStyledButton("Retour au menu principal");
+        returnButton.addActionListener(e -> {
+            playSound("assets/sounds/click_fantasy_ok.wav");
+            cardLayout.show(mainPanel, "menu");
+        });
+
+        buttonReturnPanel.add(returnButton);
+        lobbyPanel.setBorder(BorderFactory.createEmptyBorder(50,0,50,0));
+
+
+        // Organisation finale
+        lobbyPanel.add(buttonPanel, BorderLayout.CENTER);
+        lobbyPanel.add(buttonReturnPanel, BorderLayout.SOUTH);
+        // Positionnement en bas
+
+        return lobbyPanel;
     }
 
     private JButton createStyledButton(String text) {
@@ -238,7 +423,7 @@ public class FenetrePrincipal extends JFrame {
         return button;
     }
 
-    private void endTurn(int joueur, int tour){
+    private void endTurn(int joueur, int tour, Partie partie){
         JFrame jFrame = new JFrame();
         JDialog dialog = new JDialog(jFrame, "Test");
 
@@ -261,11 +446,47 @@ public class FenetrePrincipal extends JFrame {
 
         timer.setRepeats(false);
         timer.start();
+
+        if (joueur == 1) partie.getJoueur1().resetAAgitCeTour();
+        else partie.getJoueur2().resetAAgitCeTour();
+        Joueur joueurActuel = partie.getJoueurActuel();
+        for (Unite unite : joueurActuel.getUnites()) {
+            unite.recupererPV();
+            unite.reinitialiserTour();
+        }
+      //  partie.getJoueur1().resetAAgitCeTour();
+       // partie.getJoueur2().resetAAgitCeTour();
     }
+
+
 
     private JPanel creeJeuPanel(Plateau plateau) {
         JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
         jeuPanel.setLayout(new BorderLayout());
+
+        // Labels pour afficher les pseudos des joueurs
+        JLabel labelJoueur1 = new JLabel("👑 " + pseudoJoueur1);
+        labelJoueur1.setFont(new Font("Serif", Font.BOLD, 20));
+        labelJoueur1.setForeground(Color.WHITE);
+        labelJoueur1.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JLabel labelJoueur2 = new JLabel(pseudoJoueur2 + " 👑");
+        labelJoueur2.setFont(new Font("Serif", Font.BOLD, 20));
+        labelJoueur2.setForeground(Color.WHITE);
+        labelJoueur2.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Panels pour positionner les labels à gauche et à droite
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setOpaque(false);
+        leftPanel.add(labelJoueur1, BorderLayout.CENTER);
+
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setOpaque(false);
+        rightPanel.add(labelJoueur2, BorderLayout.CENTER);
+
+        jeuPanel.add(leftPanel, BorderLayout.WEST);
+        jeuPanel.add(rightPanel, BorderLayout.EAST);
+
 
         // Panel du haut avec bouton retour
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -282,7 +503,7 @@ public class FenetrePrincipal extends JFrame {
         JLabel explicationPrep = new JLabel("Phase de préparation : chaque joueur peut mettre autant d'unités qu'il veut, là où il veut, puis cliquer sur le bouton de démarrage à droite quand l'organisation des unités est satisfaisante.");
         explicationPrep.setForeground(Color.WHITE);
         explicationPrep.setFont(new Font("Serif", Font.BOLD, 13));
-        topPanel.add(explicationPrep);
+        //topPanel.add(explicationPrep);
 
         // Explication de la phase de jeu
         JLabel explicationJeu = new JLabel("Phase de jeu : chaque joueur peut utiliser ses unités comme il le souhaite, et son tour sera terminé dès qu'aucune de ses unités ne peut bouger, ou bien prématurément en appuyant sur le bouton à droite.");
@@ -300,38 +521,74 @@ public class FenetrePrincipal extends JFrame {
         rightUnitsPanel.setOpaque(false); // <-- Et ici aussi
 
         // Bouton de fin de tour
-        JButton buttonEndTurn = new JButton("Terminer son tour");
         buttonEndTurn.addActionListener(e -> {
-            partie.setToursInd(partie.getToursInd()+1);
-            int joueur = 2;
-            if (partie.getToursInd() % 2 == 1) {
-                joueur = 1;
-                partie.setTurnNumber(partie.getTurnNumber()+1);
+            partie.setToursInd(partie.getToursInd() + 1);
+        
+            mainGamePanel.remove(leftUnitsPanel);
+            mainGamePanel.remove(rightUnitsPanel);
+            if(partie.getToursInd() <= 2){
+                if (partie.getToursInd() % 2 == 1) {
+                    // Tour du joueur 1
+                    mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+                } else {
+                    // Tour du joueur 2
+                    mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
+                }
+            }else{
+                partie.setPartieCommence(true);
+                mainGamePanel.remove(leftUnitsPanel);
+                mainGamePanel.remove(rightUnitsPanel);
+                topPanel.remove(explicationPrep);
+                
+                // Tu peux remettre l’explication du jeu ici si besoin
+                // topPanel.add(explicationJeu);
+            
+                mainGamePanel.revalidate();
+                mainGamePanel.repaint();
+            
+                endTurn(1, 1, partie);
             }
             
-            endTurn(joueur, partie.getTurnNumber());
+            mainGamePanel.revalidate();
+            mainGamePanel.repaint();
+        
+            int joueur = (partie.getToursInd() % 2 == 1) ? 1 : 2;
+            if (joueur == 1) {
+                partie.setTurnNumber(partie.getTurnNumber() + 1);
+            }
+        
+            endTurn(joueur, partie.getTurnNumber(), partie);
         });
 
         // Création du bouton pour démarrer la partie
         JButton startGame = new JButton("Démarrer la partie !");
-        startGame.addActionListener(e-> {
+        startGame.addActionListener(e -> {
+            partie.setPartieCommence(true);
             mainGamePanel.remove(leftUnitsPanel);
             mainGamePanel.remove(rightUnitsPanel);
             topPanel.remove(explicationPrep);
             topPanel.remove(startGame);
-            topPanel.add(explicationJeu);
-            topPanel.add(buttonEndTurn);
-            endTurn(1, 1);
-            revalidate();
+            
+            // Tu peux remettre l’explication du jeu ici si besoin
+            // topPanel.add(explicationJeu);
+        
+            mainGamePanel.revalidate();
+            mainGamePanel.repaint();
+        
+            endTurn(1, 1, partie);
         });
-        topPanel.add(startGame);
-
+        
+        //topPanel.add(startGame);
+        topPanel.add(buttonEndTurn);
 
         // Ajout des composants
-        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
-        mainGamePanel.add(hexPlateau, BorderLayout.CENTER);
-        mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
 
+        
+        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+        mainGamePanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+
+
+        mainGamePanel.add(hexPlateau, BorderLayout.CENTER);
         // Configuration finale
         jeuPanel.add(topPanel, BorderLayout.NORTH);
         jeuPanel.add(mainGamePanel, BorderLayout.CENTER);
@@ -340,35 +597,37 @@ public class FenetrePrincipal extends JFrame {
     }
 
     private JPanel createUnitsPanel(String side) {
-        JPanel unitsPanel = new JPanel();
-        unitsPanel.setLayout(new BoxLayout(unitsPanel, BoxLayout.Y_AXIS));
-        unitsPanel.setBackground(new Color(240, 240, 240));
-        unitsPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+    JPanel unitsPanel = new JPanel();
+    unitsPanel.setLayout(new BoxLayout(unitsPanel, BoxLayout.Y_AXIS));
+    unitsPanel.setBackground(new Color(240, 240, 240));
+    unitsPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
-        String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
-        String[] unitImages = {
-            "./assets/InfanterieLourde.png",
-            "./assets/Archer.png",
-            "./assets/Mage.png",
-            "./assets/InfanterieLegere.png",
-            "./assets/Cavalerie.png"
-        };
+    // Définir le dossier joueur
+    String joueurPath = side.equals("left") ? "Joueur1" : "Joueur2";
 
-        for (int i = 0; i < unitTypes.length; i++) {
-            final int index = i;
-            JButton unitBtn = createUnitButton(unitTypes[index], unitImages[index]);
-            unitBtn.addActionListener(e -> {
-                selectUnit(unitTypes[index], side);
-                JOptionPane.showMessageDialog(this, unitTypes[index] + " sélectionnée !");
-            });
-            unitsPanel.add(unitBtn);
-            if (index < unitTypes.length - 1) {
-                unitsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-            }
+    // Noms des unités et des images (mêmes noms pour tous, seul le dossier change)
+    String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
+    String[] imageNames = {"InfanterieLourde", "Archer", "Mage", "InfanterieLegere", "Cavalerie"};
+
+    for (int i = 0; i < unitTypes.length; i++) {
+        final int index = i;
+        String imagePath = "./assets/" + joueurPath + "/" + imageNames[i] + ".png";
+
+        JButton unitBtn = createUnitButton(unitTypes[i], imagePath);
+        unitBtn.addActionListener(e -> {
+            selectUnit(unitTypes[index], side);
+            JOptionPane.showMessageDialog(this, unitTypes[index] + " sélectionnée !");
+        });
+
+        unitsPanel.add(unitBtn);
+        if (index < unitTypes.length - 1) {
+            unitsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         }
-
-        return unitsPanel;
     }
+
+    return unitsPanel;
+    }
+
 
     private JButton createUnitButton(String unitName, String imagePath) {
         JButton button = new JButton(unitName);
@@ -394,53 +653,63 @@ public class FenetrePrincipal extends JFrame {
                 InfanterieLourde unitIL = new InfanterieLourde();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitIL);
+                    unitIL.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitIL);
+                    unitIL.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitIL);
                 break;
-            case "Archer": 
+            case "Archer":
                 Archer unitA = new Archer();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitA);
+                    unitA.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitA);
+                    unitA.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitA);
                 break;
-            case "Mage": 
+            case "Mage":
                 Mage unitM = new Mage();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitM);
+                    unitM.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitM);
+                    unitM.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitM);
                 break;
-            case "Infanterie Legere": 
+            case "Infanterie Legere":
                 InfanterieLegere unitILe = new InfanterieLegere();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitILe);
+                    unitILe.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitILe);
+                    unitILe.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitILe);
                 break;
-            case "Cavalerie": 
+            case "Cavalerie":
                 Cavalerie unitC = new Cavalerie();
                 if (side == "left") {
                     partie.getJoueur1().ajouterUnite(unitC);
+                    unitC.setProprietaire(partie.getJoueur1());
                 }
                 else {
                     partie.getJoueur2().ajouterUnite(unitC);
+                    unitC.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitC);
                 break;
-            default: 
+            default:
                 break;
         }
     }
