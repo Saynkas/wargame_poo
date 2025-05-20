@@ -13,6 +13,7 @@ public abstract class Unite {
     protected List<Arme> armes;
     protected boolean aAgitCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
     protected Joueur proprietaire;
+    protected boolean estAttaque;
 
     public Unite() {
         this.armes = new ArrayList<>();
@@ -62,7 +63,7 @@ public abstract class Unite {
     }
 
     public void recupererPV() {
-        if (!aAgitCeTour && estVivant()) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour
+        if (!aAgitCeTour && estVivant() && !estAttaque) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour et si il a pas été attaqué
             int recuperation = (int) Math.ceil(0.1 * pointsDeVieMax); // Récupère 10% des PV max
             this.pointsDeVie = Math.min(pointsDeVieMax, pointsDeVie + recuperation); // Assure que les PV ne dépassent pas le maximum
         }
@@ -140,5 +141,22 @@ public abstract class Unite {
     }
     public void setProprietaire(Joueur proprietaire) {
         this.proprietaire = proprietaire;
+    }
+    public boolean getEstAttaque() {
+        return estAttaque;
+    }
+    public void setEstAttaque(boolean estAttaque) {
+        this.estAttaque = estAttaque;
+    }
+    public boolean peutAttaquerDansDirection(int dirRow, int dirCol) {
+        return true;
+    }
+    public int getPortee() {
+        int somme = 0;
+        // Calcule la portée totale de l'unité en fonction de ses armes
+        for (Arme arme : armes) {
+            somme += arme.getPortee();
+        }
+        return somme;
     }
 }

@@ -440,6 +440,7 @@ public class FenetrePrincipal extends JFrame {
         dialog.setLocationRelativeTo(jFrame);  // Centrer par rapport au parent
         dialog.setVisible(true);
 
+
         Timer timer = new Timer(2000, e -> {
             dialog.dispose();
         });
