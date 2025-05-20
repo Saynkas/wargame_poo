@@ -6,7 +6,7 @@ public class InfanterieLourde extends Unite {
         this.attaque = 12;
         this.defense = 8;
         this.deplacement = 3;
-        this.vision = 1;
+        this.vision = 2;
 
         this.ajouterArme(Arme.EPEE);
     }

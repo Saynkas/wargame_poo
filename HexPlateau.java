@@ -1,11 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
 
 
 public class HexPlateau extends JPanel {
@@ -459,11 +459,19 @@ public class HexPlateau extends JPanel {
     private void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur) {
         // Rendre la case centrale visible
         plateau.getCase(ligne, colonne).setVisiblePour(joueur, true);
-    
-        // Parcourir toutes les cases du plateau et tester si elles sont voisines
+        
+        //  vision de l'unité
+        HexCase caseCentrale = plateau.getCase(ligne, colonne);
+        int porteeVision = caseCentrale.estOccupee() ? caseCentrale.getUnite().getVision() : 1;
+        
+        // Parcourir toutes les cases du plateau
         for (int i = 0; i < plateau.getLignes(); i++) {
             for (int j = 0; j < plateau.getColonnes(); j++) {
-                if (estVoisine(ligne, colonne, i, j)) {
+                // Calculer la distance entre la case centrale et la case courante
+                int distance = calculerDistance(ligne, colonne, i, j) * 2;
+                
+                // Si la distance est inférieure ou égale à la portée de vision rendre visible
+                if (distance <= porteeVision) {
                     plateau.getCase(i, j).setVisiblePour(joueur, true);
                 }
             }

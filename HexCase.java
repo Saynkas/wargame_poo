@@ -116,36 +116,19 @@ public class HexCase{
         String path = unite.getProprietaire().getId() == 1 ? "Joueur1" : "Joueur2";
 
         // Retourne le chemin de l'image en fonction du type d'unité
-        if (path.equals("Joueur1")) {
             if (unite instanceof InfanterieLourde) {
-                return "./assets/Joueur1/InfanterieLourde.png";
+                return "./assets/" + path + "/InfanterieLourde.png";
             } else if (unite instanceof Archer) {
-                return "./assets/Joueur1/Archer.png";
+                return "./assets/" + path + "/Archer.png";
             } else if (unite instanceof Mage) {
-                return "./assets/Joueur1/Mage.png";
+                return "./assets/" + path + "/Mage.png";
             } else if (unite instanceof InfanterieLegere) {
-                return "./assets/Joueur1/InfanterieLegere.png";
+                return "./assets/" + path + "/InfanterieLegere.png";
             } else if (unite instanceof Cavalerie) {
-                return "./assets/Joueur1/Cavalerie.png";
+                return "./assets/" + path + "/Cavalerie.png";
             } else {
                 return "./assets/error.png"; // Image par défaut
             }
-        }
-        else {
-            if (unite instanceof InfanterieLourde) {
-                return "./assets/Joueur2/InfanterieLourde.png";
-            } else if (unite instanceof Archer) {
-                return "./assets/Joueur2/Archer.png";
-            } else if (unite instanceof Mage) {
-                return "./assets/Joueur2/Mage.png";
-            } else if (unite instanceof InfanterieLegere) {
-                return "./assets/Joueur2/InfanterieLegere.png";
-            } else if (unite instanceof Cavalerie) {
-                return "./assets/Joueur2/Cavalerie.png";
-            } else {
-                return "./assets/error.png"; // Image par défaut
-            }
-        }
     }
     public boolean contientUniteEnnemie(Unite unite) {
         return estOccupee() && getUnite().getProprietaire() != unite.getProprietaire();

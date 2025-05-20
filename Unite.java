@@ -161,4 +161,7 @@ public abstract class Unite {
     public boolean peutAttaquerDansDirection(int dirRow, int dirCol) {
         return true;
     }
+    public int getDeplacementRestant() {
+        return deplacement;
+    }
 }
