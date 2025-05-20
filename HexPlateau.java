@@ -1,9 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 
@@ -22,6 +19,7 @@ public class HexPlateau extends JPanel {
     private JButton buttonEndTurn;
     private HexCase oldHexCase;
     private FenetrePrincipal fenetrePrincipale;
+    private ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> historyPlayerUnits;
 
 
     private final Image textureForet;
@@ -51,6 +49,7 @@ public class HexPlateau extends JPanel {
         this.fenetrePrincipale = fenetrePrincipale;
         this.uniteSelectionnee = null;
         this.placementNouvelleUnite = false;
+        this.historyPlayerUnits = new ArrayList<>();
         setOpaque(false);
 
         this.textureForet = new ImageIcon(getClass().getResource("/assets/map/forest.jpg")).getImage();
@@ -87,6 +86,7 @@ public class HexPlateau extends JPanel {
 
     //interaction avec le plateau
     private void gererClick(int x, int y) {
+        System.out.println("x : " + x + " y : " + y);
         Joueur joueurActuel = partie.getJoueurActuel();
 
         // Parcours de toutes les cases du plateau
@@ -111,6 +111,7 @@ public class HexPlateau extends JPanel {
                             // Tour impair -> placement possible dans les colonnes < 3
                             if (partie.getToursInd() % 2 == 1) {
                                 if (j <= 3) {
+                                    historyPlayerUnits.add(new AbstractMap.SimpleEntry<>(i, j));
                                     hexCase.placerUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
@@ -469,6 +470,35 @@ public class HexPlateau extends JPanel {
             }
         }
     }
-    
-}
 
+    public void setUnitsIA(AbstractMap.SimpleEntry<Integer, Integer> coords) {
+        //System.out.println("coords ia x : " + (1000-coords.getKey()) + " y : " + (600-coords.getValue())); // todo utiliser lig,col pour trouver où cliquer
+        Point center = hexToPixel(coords.getValue(), coords.getKey());
+        System.out.println("original x : " + coords.getKey() + " y  : "+coords.getValue());
+        Point center2 = hexToPixel(12-coords.getValue(), 18-coords.getKey());
+        System.out.println("mirroir x : " + (18-coords.getKey()) + " y : " + (12-coords.getValue()));
+        System.out.println("center x : " + center.x + " y : " + center.y);
+        System.out.println("center2 x : " + center2.x + " y : " + center2.y);
+        //System.out.println("test x : " + (1000-center.x-30) + " y : " + (600-center.y-30));
+        MouseEvent clickEvent = new MouseEvent(
+                this,
+                MouseEvent.MOUSE_CLICKED,
+                System.currentTimeMillis(),
+                0,
+                1000-center.x, 600-center.y,
+                1,
+                false,
+                MouseEvent.BUTTON1
+        );
+        this.dispatchEvent(clickEvent);
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> getHistoryPlayerUnits() {
+        return historyPlayerUnits;
+    }
+}

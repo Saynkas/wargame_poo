@@ -4,11 +4,13 @@ public class Joueur {
     private int id;
     private String nom;
     private ArrayList<Unite> unites;
+    private boolean estIA;
 
     public Joueur(int id, String nom) {
         this.id = id;
         this.nom = nom;
         this.unites = new ArrayList<>();
+        this.estIA = false;
     }
 
     public void ajouterUnite(Unite unite) {
@@ -51,5 +53,13 @@ public class Joueur {
 
     public String getNom() {
         return nom;
+    }
+
+    public boolean isEstIA() {
+        return estIA;
+    }
+
+    public void setEstIA(boolean estIA) {
+        this.estIA = estIA;
     }
 }
