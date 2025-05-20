@@ -13,7 +13,7 @@ public abstract class Unite {
     protected List<Arme> armes;
     protected boolean aAgitCeTour;// Indique si l'unité a attaqué ou s'est déplacée ce tour
     protected Joueur proprietaire;
-
+    protected boolean estAttaque;
     public Unite() {
         this.armes = new ArrayList<>();
         this.aAgitCeTour = false;
@@ -132,6 +132,14 @@ public abstract class Unite {
         this.aAgitCeTour = bool;
     }
 
+    public void setEstAttaque(boolean estAttaque) {
+        this.estAttaque = estAttaque;
+    }
+
+    public boolean getEstAttaque() {
+        return estAttaque;
+    }
+
     public boolean getAAgitCeTour() {
         return aAgitCeTour;
     }
@@ -140,5 +148,17 @@ public abstract class Unite {
     }
     public void setProprietaire(Joueur proprietaire) {
         this.proprietaire = proprietaire;
+    }
+    public int getPortee(){
+        int porteeMax = 0;
+        for (Arme arme : armes) {
+            if (arme.getPortee() > porteeMax) {
+                porteeMax = arme.getPortee();
+            }
+        }
+        return porteeMax;
+    }
+    public boolean peutAttaquerDansDirection(int dirRow, int dirCol) {
+        return true;
     }
 }

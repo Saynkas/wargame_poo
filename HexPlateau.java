@@ -172,7 +172,39 @@ public class HexPlateau extends JPanel {
                         } 
                         // Sinon si la case ciblée est libre et accessible
                         else if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
-                            // Déplacer l’unité vers la nouvelle case
+                            // Vérifier s'il y a des ennemis dans la direction du déplacement
+                            boolean aAttaque = false;
+                            int[] direction = getDirection(ligneInitial, colonneInitial, i, j);
+                            
+                            // Vérifier les cases dans cette direction pour des ennemis
+                            for (int d = 1; d <= uniteSelectionnee.getPortee(); d++) {
+                                int checkRow = ligneInitial + direction[0] * d;
+                                int checkCol = colonneInitial + direction[1] * d;
+                                
+                                if (checkRow >= 0 && checkRow < plateau.getLignes() && 
+                                    checkCol >= 0 && checkCol < plateau.getColonnes()) {
+                                    
+                                    HexCase caseACheck = plateau.getCase(checkRow, checkCol);
+                                    if (caseACheck.estOccupee() && 
+                                        caseACheck.getUnite().getProprietaire() != uniteSelectionnee.getProprietaire() &&
+                                        uniteSelectionnee.peutAttaquerDansDirection(direction[0], direction[1])) {
+                                        
+                                        // Attaquer l'unité ennemie
+                                        Unite cible = caseACheck.getUnite();
+                                        int distance = calculerDistance(ligneInitial, colonneInitial, checkRow, checkCol);
+                                        uniteSelectionnee.attaquer(cible, caseACheck.getTerrain(), distance);
+                                        
+                                        if (!cible.estVivant()) {
+                                            caseACheck.retirerUnite();
+                                        }
+                                        
+                                        aAttaque = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Déplacer l'unité vers la nouvelle case
                             plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                             hexCase.placerUnite(uniteSelectionnee);
                             uniteSelectionnee.setAAgitCeTour(true);
@@ -180,49 +212,45 @@ public class HexPlateau extends JPanel {
                             casesAccessiblesCache = null;
                             rendreCasesAutourVisibles(i, j, joueurActuel);
                             repaint();
-
-                            // Vérifier si le joueur actif ne peut plus jouer et si la partie a commencé
-                            if ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer()) ||
+                            
+                            if (aAttaque && ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer()) ||
                                 (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()) &&
-                                partie.isPartieCommence()) {
-
-                                buttonEndTurn.doClick(); // Fin du tour automatique
+                                partie.isPartieCommence())) {
+                                
+                                buttonEndTurn.doClick();
                             }
                         }
                         // Gestion de l’attaque si on est en train de déplacer une unité
                         // et que la case ciblée est occupée par une unité ennemie accessible
                         if (hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
-
-                            System.out.println("Attaque en cours...");
-
                             Unite cible = hexCase.getUnite();
 
-                            // Vérifier que la cible appartient à l’adversaire
+                            // Vérifier que la cible appartient à l'adversaire
                             if (cible.getProprietaire() != uniteSelectionnee.getProprietaire()) {
-
-                                // Calculer la distance entre l’unité sélectionnée et la cible
-                                int distance = calculerDistance(ligneInitial, colonneInitial, i, j);
-
-                                // Effectuer l’attaque
-                                uniteSelectionnee.attaquer(cible, hexCase.getTerrain(), distance);
-
-                                // Si la cible est morte, la retirer et déplacer l’attaquant à sa place
-                                if (!cible.estVivant()) {
-                                    hexCase.retirerUnite();
-                                    plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
-                                    hexCase.placerUnite(uniteSelectionnee);
-                                }
-
-                                // Affichage console des infos d’attaque
-                                System.out.println("Attaque réussie !");
-                                System.out.println("Unité attaquante : " + uniteSelectionnee.getNom());
-                                System.out.println("Unité cible : " + cible.getNom());
-                                System.out.println("Dégâts infligés : " + uniteSelectionnee.calculerDegats(cible, hexCase.getTerrain(), distance));
+                                // Calculer la direction de déplacement
+                                int[] direction = getDirection(ligneInitial, colonneInitial, i, j);
                                 
-                                uniteSelectionnee.setAAgitCeTour(true);
-                                estEntrainDeplace = false;
-                                casesAccessiblesCache = null;
-                                repaint();
+                                // Vérifier si l'unité peut attaquer dans cette direction (porte d'arme)
+                                if (uniteSelectionnee.peutAttaquerDansDirection(direction[0], direction[1])) {
+                                    // Calculer la distance entre l'unité sélectionnée et la cible
+                                    int distance = calculerDistance(ligneInitial, colonneInitial, i, j);
+
+                                    // Effectuer l'attaque
+                                    uniteSelectionnee.attaquer(cible, hexCase.getTerrain(), distance);
+
+                                    // Si la cible est morte, la retirer et déplacer l'attaquant à sa place
+                                    if (!cible.estVivant()) {
+                                        hexCase.retirerUnite();
+                                        plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                        hexCase.placerUnite(uniteSelectionnee);
+                                    }
+
+                                    uniteSelectionnee.setAAgitCeTour(true);
+                                    cible.setEstAttaque(true);
+                                    estEntrainDeplace = false;
+                                    casesAccessiblesCache = null;
+                                    repaint();
+                                }
                             }
                         }
 
@@ -239,6 +267,12 @@ public class HexPlateau extends JPanel {
         int dx = Math.abs(x1 - x2);
         int dy = Math.abs(y1 - y2);
         return (dx + dy + Math.abs(dx - dy)) / 2;
+    }
+    private int[] getDirection(int fromRow, int fromCol, int toRow, int toCol) {
+        int[] direction = new int[2];
+        direction[0] = Integer.compare(toRow, fromRow); // direction verticale (-1, 0, 1)
+        direction[1] = Integer.compare(toCol, fromCol); // direction horizontale (-1, 0, 1)
+        return direction;
     }
 
     // Calcul des cases accessibles et mises en cache (avec Djikstra)
