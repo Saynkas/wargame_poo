@@ -62,7 +62,7 @@ public abstract class Unite {
     }
 
     public void recupererPV() {
-        if (!aAgitCeTour && estVivant()) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour
+        if (!aAgitCeTour && estVivant() && !estAttaque) { // Vérifie si l'unité n'a pas attaqué ou déplacé ce tour
             int recuperation = (int) Math.ceil(0.1 * pointsDeVieMax); // Récupère 10% des PV max
             this.pointsDeVie = Math.min(pointsDeVieMax, pointsDeVie + recuperation); // Assure que les PV ne dépassent pas le maximum
         }
