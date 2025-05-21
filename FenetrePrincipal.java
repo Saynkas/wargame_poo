@@ -22,6 +22,7 @@ public class FenetrePrincipal extends JFrame {
     private Partie partie;
     private JButton buttonEndTurn = createStyledButton("Terminer son tour");
     private JLabel messageStatusLabel = new JLabel("Aucune unité sélectionnée");
+    JPanel topPanel;
 
 
     public void mettreAJourMessage(String message) {
@@ -363,6 +364,8 @@ public class FenetrePrincipal extends JFrame {
 
 
         pvcButton.addActionListener(e -> {
+            pseudoJoueur1 = "Joueur";
+            pseudoJoueur2 = "IA";
             playSound("assets/sounds/click_fantasy_ok.wav");
             Plateau plateau = new Plateau(12, 18);
             hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn, this);
@@ -472,6 +475,18 @@ public class FenetrePrincipal extends JFrame {
         }
     }
 
+    public void finDePartie() {
+        topPanel.remove(buttonEndTurn);
+        if (partie.getJoueur2().isEstIA()) {
+            if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur a gagné la partie !");
+            else JOptionPane.showMessageDialog(null, "L'IA a gagné la partie !");
+        }
+        else {
+            if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur1 + " a gagné la partie !");
+            else JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur2 + " a gagné la partie !");
+        }
+    }
+
 
     private JPanel creeJeuPanelIA() {
     JPanel jeuPanel = new BackGroundPanel("./backGroundImages/carte_medieval.jpg");
@@ -552,7 +567,7 @@ public class FenetrePrincipal extends JFrame {
 
 
     // Panel du haut avec bouton retour
-    JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     topPanel.setOpaque(false); // <-- Ajoute ça
     JButton retourButton = createStyledButton("Retour au menu");
     retourButton.addActionListener(e -> {
@@ -594,29 +609,31 @@ public class FenetrePrincipal extends JFrame {
                 // Tour du joueur 1
                 mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
             } else {
-                // Tour du joueur 2 (IA)
-                for (int i = 0; i < partie.getJoueur1().getUnites().size(); i++) {
-                    if (partie.getJoueur1().getUnites().get(i) instanceof Archer) {
-                        selectUnit("Archer", "right");
-                    }
-                    else if (partie.getJoueur1().getUnites().get(i) instanceof Cavalerie) {
-                        selectUnit("Cavalerie", "right");
-                    }
-                    else if (partie.getJoueur1().getUnites().get(i) instanceof InfanterieLegere) {
-                        selectUnit("InfanterieLegere", "right");
-                    }
-                    else if (partie.getJoueur1().getUnites().get(i) instanceof InfanterieLourde) {
-                        selectUnit("InfanterieLourde", "right");
-                    }
-                    else if (partie.getJoueur1().getUnites().get(i) instanceof Mage) {
-                        selectUnit("Mage", "right");
-                    }
-                    else {
-                        System.out.println("n'est censé jamais arriver");
-                    }
-                   // System.out.println("i : " + i);
-                    hexPlateau.setUnitsIA(new AbstractMap.SimpleEntry<Integer, Integer>(hexPlateau.getHistoryPlayerUnits().get(i).getKey(),hexPlateau.getHistoryPlayerUnits().get(i).getValue()));
+                // HARDCODER 1 UNITE DE CHAQUE TYPE A DES COORDONEES PRECISES QUI MARCHENT POUR L'INSTANT
+                String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
+                ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> listCoords = new ArrayList<>();
+                listCoords.add(new AbstractMap.SimpleEntry<>(777, 228));
+                listCoords.add(new AbstractMap.SimpleEntry<>(802, 273));
+                listCoords.add(new AbstractMap.SimpleEntry<>(774, 321));
+                listCoords.add(new AbstractMap.SimpleEntry<>(801, 361));
+                listCoords.add(new AbstractMap.SimpleEntry<>(776, 408));
+
+                for (int i = 0; i < 1; i++) {
+                    selectUnit(unitTypes[i], "right");
+                    hexPlateau.setUnitsIA(listCoords.get(i));
                 }
+                // Tour du joueur 2 (IA)
+                /*for (int i = 0; i < partie.getJoueur1().getUnites().size(); i++) { CODE DE MIROIR BUGGE, UNITES DE IA HARDCODEES POUR L'INSTANT
+                    switch (partie.getJoueur1().getUnites().get(i)) {
+                        case Archer _ -> selectUnit("Archer", "right");
+                        case Cavalerie _ -> selectUnit("Cavalerie", "right");
+                        case InfanterieLegere _ -> selectUnit("InfanterieLegere", "right");
+                        case InfanterieLourde _ -> selectUnit("InfanterieLourde", "right");
+                        case Mage _ -> selectUnit("Mage", "right");
+                        case null, default -> System.out.println("n'est censé jamais arriver");
+                    }
+                    hexPlateau.setUnitsIA(new AbstractMap.SimpleEntry<Integer, Integer>(hexPlateau.getHistoryPlayerUnits().get(i).getKey(),hexPlateau.getHistoryPlayerUnits().get(i).getValue()));
+                }*/
                 buttonEndTurn.doClick();
             }
         }else{
@@ -636,18 +653,32 @@ public class FenetrePrincipal extends JFrame {
                             Random random = new Random();
                             Map<Point,Integer> coordsPossibles = hexPlateau.calculerCasesAccessibles(i, j, u);
                             for (Point p : coordsPossibles.keySet()) {
-                                if (partie.getJoueur1().getUnites().contains(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite())) { // vérification s'il y a un ennemi en range
+                                // vérification s'il y a un ennemi en range
+                                if (partie.getJoueur1().getUnites().contains(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite()) && hexPlateau.getPlateau().getCase(i, j).getUnite() != null && !hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
                                     System.out.println("tentative d'attaque");
                                     u.attaquer(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite(), hexPlateau.getPlateau().getCase(p.x, p.y).getTerrain(), hexPlateau.calculerDistance(i, j, p.x, p.y));
                                     //hexPlateau.getPlateau().getCase(i, j).getUnite().setAAgitCeTour(true);
+                                    // si on tue l'ennemi, prendre sa place
+                                    if (!hexPlateau.getPlateau().getCase(p.x, p.y).getUnite().estVivant()) {
+                                        System.out.println("unité tuée !");
+                                        hexPlateau.getPlateau().getCase(p.x, p.y).retirerUnite();
+                                        hexPlateau.getPlateau().getCase(i, j).retirerUnite();
+                                        hexPlateau.getPlateau().getCase(p.x, p.y).placerUnite(u);
+                                        if (!partie.partieTerminee()) {
+                                            finDePartie();
+                                        }
+                                    }
                                 }
                             }
-                            if (!hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
+                            if (hexPlateau.getPlateau().getCase(i, j).getUnite() != null && !hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
                                 // nombre aléatoire entre 0 et tailleListe - 1
                                 Point randomKey = new ArrayList<>(coordsPossibles.keySet()).get(random.nextInt(coordsPossibles.size()));
                                // System.out.println(randomKey);
-                                hexPlateau.getPlateau().getCase(i, j).retirerUnite();
-                                hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                                if (!hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).estOccupee()) {
+                                    hexPlateau.getPlateau().getCase(i, j).retirerUnite();
+                                    hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                                }
+                                u.setAAgitCeTour(true);
                             }
                         }
                     }
@@ -665,7 +696,6 @@ public class FenetrePrincipal extends JFrame {
 
 
         }
-
     });
 
     // Création du bouton pour démarrer la partie
@@ -795,7 +825,7 @@ public class FenetrePrincipal extends JFrame {
 
 
         // Panel du haut avec bouton retour
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false); // <-- Ajoute ça
         JButton retourButton = createStyledButton("Retour au menu");
         retourButton.addActionListener(e -> {

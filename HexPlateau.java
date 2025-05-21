@@ -239,7 +239,7 @@ public class HexPlateau extends JPanel {
                         }                        
                         // Gestion de l’attaque si on est en train de déplacer une unité
                         // et que la case ciblée est occupée par une unité ennemie accessible
-                        if (hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
+                        if (hexCase.estOccupee() && casesAccessiblesCache != null && casesAccessiblesCache.containsKey(new Point(i, j))) {
                             Unite cible = hexCase.getUnite();
 
                             // Vérifier que la cible appartient à l'adversaire
@@ -260,6 +260,9 @@ public class HexPlateau extends JPanel {
                                         hexCase.retirerUnite();
                                         plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                         hexCase.placerUnite(uniteSelectionnee);
+                                        if (!partie.partieTerminee()) {
+                                            fenetrePrincipale.finDePartie();
+                                        }
                                     }
 
                                     uniteSelectionnee.setAAgitCeTour(true);
@@ -593,27 +596,19 @@ public class HexPlateau extends JPanel {
     }
 
     public void setUnitsIA(AbstractMap.SimpleEntry<Integer, Integer> coords) {
-        //System.out.println("coords ia x : " + (1000-coords.getKey()) + " y : " + (600-coords.getValue())); // todo utiliser lig,col pour trouver où cliquer
-        Point center = hexToPixel(coords.getValue(), coords.getKey());
-        //System.out.println("original x : " + coords.getKey() + " y  : "+coords.getValue());
-        Point center2 = hexToPixel(12-coords.getValue(), 18-coords.getKey());
-        //System.out.println("mirroir x : " + (18-coords.getKey()) + " y : " + (12-coords.getValue()));
-       // System.out.println("center x : " + center.x + " y : " + center.y);
-      //  System.out.println("center2 x : " + center2.x + " y : " + center2.y);
-        //System.out.println("test x : " + (1000-center.x-30) + " y : " + (600-center.y-30));
         MouseEvent clickEvent = new MouseEvent(
                 this,
                 MouseEvent.MOUSE_CLICKED,
                 System.currentTimeMillis(),
                 0,
-                1000-center.x, 600-center.y,
+                coords.getKey(), coords.getValue(),
                 1,
                 false,
                 MouseEvent.BUTTON1
         );
         this.dispatchEvent(clickEvent);
         try {
-            Thread.sleep(50);
+            Thread.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
