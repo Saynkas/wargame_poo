@@ -1,6 +1,9 @@
 import javax.swing.*;
+import java.io.Serializable;
 
-public class UniteSelectionPanel extends JPanel {
+public class UniteSelectionPanel extends JPanel implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private HexPlateau hexPlateau;
     private JLabel uniteInfoLabel;
 

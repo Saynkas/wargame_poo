@@ -1,4 +1,8 @@
-public class Archer extends Unite {
+import java.io.Serializable;
+
+public class Archer extends Unite implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public Archer() {
         this.nom = "Archer";
         this.pointsDeVieMax = 30;

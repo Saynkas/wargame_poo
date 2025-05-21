@@ -1,4 +1,8 @@
-public class NoeudDeplacement {
+import java.io.Serializable;
+
+public class NoeudDeplacement implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     int ligne;
     int colonne;
     int coutTotal;

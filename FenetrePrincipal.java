@@ -8,11 +8,19 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import java.io.Serializable;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+
+
 
 import javax.sound.sampled.*;
 import javax.swing.*;
 
-public class FenetrePrincipal extends JFrame {
+public class FenetrePrincipal extends JFrame implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String pseudoJoueur1;
     private String pseudoJoueur2;
@@ -53,6 +61,26 @@ public class FenetrePrincipal extends JFrame {
             e.printStackTrace();
         }
     }
+
+    public void sauvegarderPartie(Partie partie, String cheminFichier) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cheminFichier))) {
+            oos.writeObject(partie);
+            System.out.println("Partie sauvegardée avec succès !");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Partie chargerPartie(String cheminFichier) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cheminFichier))) {
+            return (Partie) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 
     public FenetrePrincipal() {
         super("Fenetre mainMenu");
@@ -153,6 +181,7 @@ public class FenetrePrincipal extends JFrame {
 
             gbc.gridx = 1;
             gbc.gridy = 1;
+
             fondPanel.add(joueur2Field, gbc);
 
             JButton validerBtn = new JButton("Valider");
@@ -340,7 +369,44 @@ public class FenetrePrincipal extends JFrame {
 
 
         pvpButton.addActionListener(e -> {
-            playSound("assets/sounds/click_fantasy_ok.wav");
+        playSound("assets/sounds/click_fantasy_ok.wav");
+
+        // Boîte de dialogue avec options "Charger une sauvegarde" ou "Nouvelle partie"
+        String[] options = {"Charger une sauvegarde", "Nouvelle partie"};
+        int choix = JOptionPane.showOptionDialog(
+            this,
+            "Que voulez-vous faire ?",
+            "Choix de la partie",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[1] // bouton par défaut
+        );
+
+        if (choix == 0) {
+            String cheminFichier = "sauvegardes/sauvegarde_partie.ser";
+            Partie partieChargee = chargerPartie(cheminFichier);
+            if (partieChargee != null) {
+                this.partie = partieChargee;
+                Plateau plateau = partieChargee.getPlateau();
+
+                if (plateau == null) {
+                    JOptionPane.showMessageDialog(this, "La sauvegarde ne contient pas de plateau.");
+                    return;
+                }
+
+                hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn, this);
+                JPanel jeuPanel = creeJeuPanel(plateau);
+                mainPanel.add(jeuPanel, "plateau");
+                cardLayout.show(mainPanel, "plateau");
+            } else {
+                JOptionPane.showMessageDialog(this, "Échec du chargement de la sauvegarde.");
+            }
+        }
+
+        else if (choix == 1) {
+            // Nouvelle partie
             PseudoDialog pseudoDialog = new PseudoDialog(this);
             pseudoDialog.setVisible(true);
 
@@ -348,18 +414,22 @@ public class FenetrePrincipal extends JFrame {
             pseudoJoueur2 = pseudoDialog.getJoueur2();
 
             if (pseudoJoueur1 != null && pseudoJoueur2 != null) {
-                System.out.println("Pseudo Joueur 1 : " + pseudoJoueur1);
-                System.out.println("Pseudo Joueur 2 : " + pseudoJoueur2);
+                Joueur j1 = new Joueur(1, pseudoJoueur1);
+                Joueur j2 = new Joueur(2, pseudoJoueur2);
+                this.partie = new Partie(j1, j2);
 
                 Plateau plateau = new Plateau(12, 18);
+                partie.setPlateau(plateau); // si tu as bien ajouté ce champ
                 hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn, this);
                 JPanel jeuPanel = creeJeuPanel(plateau);
 
                 mainPanel.add(jeuPanel, "plateau");
                 cardLayout.show(mainPanel, "plateau");
             }
+        }
+    });
 
-        });
+
 
 
 
@@ -782,6 +852,15 @@ public class FenetrePrincipal extends JFrame {
             playBackgroundMusic("assets/sounds/menu_theme_ok.wav");
         });
         topPanel.add(retourButton);
+
+        // Bouton de sauvegarde
+        JButton saveButton = createStyledButton("Sauvegarder");
+        saveButton.addActionListener(e -> {
+            String cheminFichier = "sauvegardes/sauvegarde_partie.ser"; // Change le chemin si besoin
+            sauvegarderPartie(partie, cheminFichier);
+        });
+        topPanel.add(saveButton);
+
 
         // Explication de la phase de préparation
         JLabel explicationPrep = new JLabel("Phase de préparation : chaque joueur peut mettre autant d'unités qu'il veut, là où il veut, puis cliquer sur le bouton de démarrage à droite quand l'organisation des unités est satisfaisante.");

@@ -1,6 +1,9 @@
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Joueur {
+public class Joueur implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int id;
     private String nom;
     private ArrayList<Unite> unites;

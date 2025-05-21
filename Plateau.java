@@ -1,5 +1,8 @@
+import java.io.Serializable;
 
-public class Plateau{
+public class Plateau implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private HexCase[][] cases;
 
     //creation du plateau logique

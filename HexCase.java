@@ -3,9 +3,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.util.Random;
 import javax.swing.ImageIcon;
+import java.io.Serializable;
 
 
-public class HexCase{
+public class HexCase implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private TypeDeTerrain terrain;
     private Unite unite;
