@@ -1,10 +1,21 @@
+import java.io.Serializable;
 
-public class Partie {
+public class Partie implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Joueur joueur1;
     private Joueur joueur2;
     private int toursInd; // total des tours individuels
     private int turnNumber; // total des tours (actions de j1 et j2)
     private boolean partieCommence;
+    private Plateau plateau;
+
+    public Partie() {
+        this.toursInd = 1;
+        this.turnNumber = 1;
+        this.partieCommence = false;
+    }
+
 
     public Partie(Joueur joueur1, Joueur joueur2) {
         this.joueur1 = joueur1;
@@ -65,4 +76,12 @@ public class Partie {
             return joueur2;
         }
     }
+    public Plateau getPlateau() {
+        return plateau;
+    }
+
+    public void setPlateau(Plateau plateau) {
+        this.plateau = plateau;
+    }
+
 }

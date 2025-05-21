@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class Mage extends Unite {
+public class Mage extends Unite implements Serializable {
     public Mage() {
         this.nom = "Mage";
         this.pointsDeVieMax = 25;

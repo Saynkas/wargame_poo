@@ -3,9 +3,17 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.swing.*;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 
 
-public class HexPlateau extends JPanel {
+
+public class HexPlateau extends JPanel implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private static final int RADIUS = 30; //diametre de l'hexagone
 
     private Plateau plateau;
@@ -32,6 +40,18 @@ public class HexPlateau extends JPanel {
     private final BufferedImage textureDesertBuffered;
     private final Image textureRiviere;
     private final BufferedImage textureRiviereBuffered;
+
+    private void playSound(String soundPath) {
+        try {
+            File soundFile = new File(soundPath);
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 
@@ -208,8 +228,9 @@ public class HexPlateau extends JPanel {
                                                 uniteSelectionnee.attaquer(caseCible.getUnite(), caseCible.getTerrain(), distance);
                         
                                                 if (!caseCible.getUnite().estVivant()) {
+                                                    playSound("assets/sounds/death.wav");
                                                     caseCible.retirerUnite();
-                                                }
+                                                } else { playSound("assets/sounds/fight.wav");}
                         
                                                 uniteSelectionnee.setAAgitCeTour(true);
                                                 estEntrainDeplace = false;
@@ -254,9 +275,12 @@ public class HexPlateau extends JPanel {
 
                                     // Effectuer l'attaque
                                     uniteSelectionnee.attaquer(cible, hexCase.getTerrain(), distance);
+                                    
+
 
                                     // Si la cible est morte, la retirer et déplacer l'attaquant à sa place
                                     if (!cible.estVivant()) {
+                                        playSound("assets/sounds/death.wav");
                                         hexCase.retirerUnite();
                                         plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                         hexCase.placerUnite(uniteSelectionnee);
@@ -264,6 +288,7 @@ public class HexPlateau extends JPanel {
                                             fenetrePrincipale.finDePartie();
                                         }
                                     }
+                                    } else { playSound("assets/sounds/fight.wav"); }
 
                                     uniteSelectionnee.setAAgitCeTour(true);
                                     cible.setEstAttaque(true);

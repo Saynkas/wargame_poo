@@ -1,4 +1,8 @@
-public class InfanterieLourde extends Unite {
+import java.io.Serializable;
+
+public class InfanterieLourde extends Unite implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public InfanterieLourde() {
         this.nom = "Infanterie Lourde";
         this.pointsDeVieMax = 50;

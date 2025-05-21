@@ -1,4 +1,8 @@
-public class Plateau {
+import java.io.Serializable;
+
+public class Plateau implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private HexCase[][] cases;
 
     // Plateau vide, les cases seront remplies plus tard

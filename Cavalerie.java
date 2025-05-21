@@ -1,4 +1,8 @@
-public class Cavalerie extends Unite {
+import java.io.Serializable;
+
+public class Cavalerie extends Unite implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public Cavalerie() {
         this.nom = "Cavalerie";
         this.pointsDeVieMax = 40;

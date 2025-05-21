@@ -1,5 +1,8 @@
+import java.io.Serializable;
 
-public class InfanterieLegere extends Unite {
+public class InfanterieLegere extends Unite implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public InfanterieLegere() {
         this.nom = "Infanterie Légère";
         this.pointsDeVieMax = 35;
