@@ -263,7 +263,7 @@ public class HexPlateau extends JPanel {
         }
     }
 
-    private int calculerDistance(int x1, int y1, int x2, int y2) {
+    public int calculerDistance(int x1, int y1, int x2, int y2) {
         // Implémentation simple de distance hexagonale
         // (Adaptée à votre système de coordonnées)
         int dx = Math.abs(x1 - x2);

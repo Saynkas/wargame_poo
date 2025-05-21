@@ -635,33 +635,37 @@ public class FenetrePrincipal extends JFrame {
                         if (partie.getJoueur2().getUnites().contains(u)) {
                             Random random = new Random();
                             Map<Point,Integer> coordsPossibles = hexPlateau.calculerCasesAccessibles(i, j, u);
-
-                            // nombre aléatoire entre 0 et tailleListe - 1
-                            Point randomKey = new ArrayList<>(coordsPossibles.keySet()).get(random.nextInt(coordsPossibles.size()));
-                            System.out.println(randomKey);
-                            hexPlateau.getPlateau().getCase(i, j).retirerUnite();
-                            hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                            for (Point p : coordsPossibles.keySet()) {
+                                if (partie.getJoueur1().getUnites().contains(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite())) { // vérification s'il y a un ennemi en range
+                                    System.out.println("tentative d'attaque");
+                                    u.attaquer(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite(), hexPlateau.getPlateau().getCase(p.x, p.y).getTerrain(), hexPlateau.calculerDistance(i, j, p.x, p.y));
+                                    //hexPlateau.getPlateau().getCase(i, j).getUnite().setAAgitCeTour(true);
+                                }
+                            }
+                            if (!hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
+                                // nombre aléatoire entre 0 et tailleListe - 1
+                                Point randomKey = new ArrayList<>(coordsPossibles.keySet()).get(random.nextInt(coordsPossibles.size()));
+                               // System.out.println(randomKey);
+                                hexPlateau.getPlateau().getCase(i, j).retirerUnite();
+                                hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                            }
                         }
                     }
                 }
                 buttonEndTurn.doClick();
+                endTurn(partie.getJoueur1().getId(), partie.getTurnNumber(), partie);
+                partie.setTurnNumber(partie.getTurnNumber() + 1);
             }
-
-            mainGamePanel.revalidate();
-            mainGamePanel.repaint();
-
-
-        }
+            else {
+                endTurn(partie.getJoueur2().getId(), partie.getTurnNumber(), partie);
+            }
 
         mainGamePanel.revalidate();
         mainGamePanel.repaint();
 
-        int joueur = (partie.getToursInd() % 2 == 1) ? 1 : 2;
-        if (joueur == 1) {
-            partie.setTurnNumber(partie.getTurnNumber() + 1);
+
         }
 
-        endTurn(joueur, partie.getTurnNumber(), partie);
     });
 
     // Création du bouton pour démarrer la partie

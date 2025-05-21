@@ -41,17 +41,13 @@ public abstract class Unite {
 
     public void attaquer(Unite cible, TypeDeTerrain terrain, int distance) {
         int degats = calculerDegats(cible, terrain, distance);
-        
         if(degats != 0) {
             // Ajout d'un facteur aléatoire (±50%)
             Random rand = new Random();
             int variation = (int)(degats * 0.5 * (rand.nextDouble() - 0.5));
             degats = Math.max(1, degats + variation); // Au moins 1 dégât
-            
-            if (degats > 0) {
-                cible.subirDegats(degats);
-                this.aAgitCeTour = true;
-            }
+            cible.subirDegats(degats);
+            this.aAgitCeTour = true;
         }
     }
 
