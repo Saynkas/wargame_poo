@@ -1,27 +1,24 @@
-
-public class Plateau{
+public class Plateau {
     private HexCase[][] cases;
 
-    //creation du plateau logique
-    public Plateau(int ligne, int colonne){
-        cases = new HexCase[ligne][colonne];
-        for(int i = 0; i < ligne ; i++){
-            for(int j = 0; j < colonne ; j++){
-                TypeDeTerrain terrain = HexCase.choixRandTerrain();
-                cases[i][j] = new HexCase(i, j, terrain);
-            }
-        }
+    // Plateau vide, les cases seront remplies plus tard
+    public Plateau(int lignes, int colonnes) {
+        cases = new HexCase[lignes][colonnes];
     }
 
-    public HexCase getCase(int l, int c){
+    public void setCase(int ligne, int colonne, HexCase hexCase) {
+        cases[ligne][colonne] = hexCase;
+    }
+
+    public HexCase getCase(int l, int c) {
         return cases[l][c];
     }
 
-    public int getLignes(){
+    public int getLignes() {
         return cases.length;
     }
 
-    public int getColonnes(){
+    public int getColonnes() {
         return cases[0].length;
     }
 }

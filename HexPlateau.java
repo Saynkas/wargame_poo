@@ -46,6 +46,7 @@ public class HexPlateau extends JPanel {
         this.buttonEndTurn = buttonEndTurn;
         this.partie = partie;
         this.plateau = plateau;
+        genererCarteFixe();
         this.fenetrePrincipale = fenetrePrincipale;
         this.uniteSelectionnee = null;
         this.placementNouvelleUnite = false;
@@ -360,6 +361,46 @@ public class HexPlateau extends JPanel {
             default -> Color.LIGHT_GRAY;
         }; 
     }
+
+    private void genererCarteFixe() {
+        int lignes = plateau.getLignes();
+        int colonnes = plateau.getColonnes();
+    
+        for (int i = 0; i < lignes; i++) {
+            for (int j = 0; j < colonnes; j++) {
+                TypeDeTerrain terrain;
+    
+                // Rivière centrale verticale
+                if (j == colonnes / 2 || j == colonnes / 2 - 1) {
+                    terrain = TypeDeTerrain.RIVIERE;
+                }
+                // Forteresses proches du centre
+                else if ((i == lignes / 2 || i == lignes / 2 - 1) && (j == colonnes / 2 - 3 || j == colonnes / 2 + 2)) {
+                    terrain = TypeDeTerrain.FORTERESSE;
+                }
+                // Désert en diagonale
+                else if ((i - j) % 7 == 0) {
+                    terrain = TypeDeTerrain.DESERT;
+                }
+                // Forêt bien dispersée
+                else if ((i + j) % 5 == 0) {
+                    terrain = TypeDeTerrain.FORET;
+                }
+                // Zones de départ : plaine
+                else if (j <= 2 || j >= colonnes - 3) {
+                    terrain = TypeDeTerrain.PLAINE;
+                }
+                // Par défaut : plaine
+                else {
+                    terrain = TypeDeTerrain.PLAINE;
+                }
+    
+                HexCase hex = new HexCase(i, j, terrain);
+                plateau.setCase(i, j, hex);
+            }
+        }
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

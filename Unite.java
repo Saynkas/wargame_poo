@@ -29,7 +29,7 @@ public abstract class Unite {
         int bonusDefense = terrain.getBonusDefense();
 
         for (Arme arme : armes) {
-            if (distance <= arme.getPortee()) { // Vérifie si l'arme peut atteindre la cible
+            if (distance == arme.getPortee()) { // Vérifie si l'arme peut atteindre la cible
                 int degatsArme = arme.getDegats() + this.attaque + bonusAttaque;
                 int defenseCible = cible.getDefense() + bonusDefense;
                 int degats = Math.max(0, degatsArme - defenseCible);

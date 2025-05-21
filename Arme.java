@@ -1,6 +1,6 @@
 public enum Arme {
     EPEE("Épée", 8, 1, "Mêlée"),
-    ARC("Arc", 6, 3, "Distance"),
+    ARC("Arc", 6, 2, "Distance"),
     BÂTON("Bâton", 5, 2, "Mêlée"),
     BOULE_DE_FEU("Boule de Feu", 12, 3, "Distance");
 
