@@ -174,54 +174,69 @@ public class HexPlateau extends JPanel {
                         } 
                         // Sinon si la case ciblée est libre et accessible
                         else if (!hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
-                            // Vérifier s'il y a des ennemis dans la direction du déplacement
                             boolean aAttaque = false;
                             int[] direction = getDirection(ligneInitial, colonneInitial, i, j);
-                            
-                            // Vérifier les cases dans cette direction pour des ennemis
+                        
+                            // Recherche d'une cible dans cette direction
                             for (int d = 1; d <= uniteSelectionnee.getPortee(); d++) {
                                 int checkRow = ligneInitial + direction[0] * d;
                                 int checkCol = colonneInitial + direction[1] * d;
-                                
-                                if (checkRow >= 0 && checkRow < plateau.getLignes() && 
+                        
+                                if (checkRow >= 0 && checkRow < plateau.getLignes() &&
                                     checkCol >= 0 && checkCol < plateau.getColonnes()) {
-                                    
-                                    HexCase caseACheck = plateau.getCase(checkRow, checkCol);
-                                    if (caseACheck.estOccupee() && 
-                                        caseACheck.getUnite().getProprietaire() != uniteSelectionnee.getProprietaire() &&
+                        
+                                    HexCase caseCible = plateau.getCase(checkRow, checkCol);
+                                    if (caseCible.estOccupee() &&
+                                        caseCible.getUnite().getProprietaire() != uniteSelectionnee.getProprietaire() &&
                                         uniteSelectionnee.peutAttaquerDansDirection(direction[0], direction[1])) {
-                                        
-                                        // Attaquer l'unité ennemie
-                                        Unite cible = caseACheck.getUnite();
-                                        int distance = calculerDistance(ligneInitial, colonneInitial, checkRow, checkCol);
-                                        uniteSelectionnee.attaquer(cible, caseACheck.getTerrain(), distance);
-                                        
-                                        if (!cible.estVivant()) {
-                                            caseACheck.retirerUnite();
+                        
+                                        // Cherche la meilleure case atteignable pour attaquer
+                                        for (int recul = d - 1; recul >= 0; recul--) {
+                                            int fromRow = ligneInitial + direction[0] * recul;
+                                            int fromCol = colonneInitial + direction[1] * recul;
+                                            Point p = new Point(fromRow, fromCol);
+                        
+                                            if (casesAccessiblesCache.containsKey(p)) {
+                                                HexCase caseDepartAttaque = plateau.getCase(fromRow, fromCol);
+                        
+                                                // Déplacement vers la case depuis laquelle on peut attaquer
+                                                plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                                caseDepartAttaque.placerUnite(uniteSelectionnee);
+                        
+                                                // Réalisation de l'attaque
+                                                int distance = calculerDistance(fromRow, fromCol, checkRow, checkCol);
+                                                uniteSelectionnee.attaquer(caseCible.getUnite(), caseCible.getTerrain(), distance);
+                        
+                                                if (!caseCible.getUnite().estVivant()) {
+                                                    caseCible.retirerUnite();
+                                                }
+                        
+                                                uniteSelectionnee.setAAgitCeTour(true);
+                                                estEntrainDeplace = false;
+                                                casesAccessiblesCache = null;
+                                                rendreCasesAutourVisibles(fromRow, fromCol, joueurActuel);
+                                                repaint();
+                                                aAttaque = true;
+                                                caseCible.getUnite().setEstAttaque(true);
+                                                break;
+                                            }
                                         }
-                                        
-                                        aAttaque = true;
-                                        break;
+                                        break; // on a attaqué une unité donc on sort
                                     }
                                 }
                             }
-                            
-                            // Déplacer l'unité vers la nouvelle case
-                            plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
-                            hexCase.placerUnite(uniteSelectionnee);
-                            uniteSelectionnee.setAAgitCeTour(true);
-                            estEntrainDeplace = false;
-                            casesAccessiblesCache = null;
-                            rendreCasesAutourVisibles(i, j, joueurActuel);
-                            repaint();
-                            
-                            if (aAttaque && ((partie.getToursInd() % 2 == 1 && !partie.getJoueur1().peutEncoreJouer()) ||
-                                (partie.getToursInd() % 2 == 0 && !partie.getJoueur2().peutEncoreJouer()) &&
-                                partie.isPartieCommence())) {
-                                
-                                buttonEndTurn.doClick();
+                        
+                            // Sinon, déplacement normal vers la case cliquée
+                            if (!aAttaque) {
+                                plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
+                                hexCase.placerUnite(uniteSelectionnee);
+                                uniteSelectionnee.setAAgitCeTour(true);
+                                estEntrainDeplace = false;
+                                casesAccessiblesCache = null;
+                                rendreCasesAutourVisibles(i, j, joueurActuel);
+                                repaint();
                             }
-                        }
+                        }                        
                         // Gestion de l’attaque si on est en train de déplacer une unité
                         // et que la case ciblée est occupée par une unité ennemie accessible
                         if (hexCase.estOccupee() && casesAccessiblesCache.containsKey(new Point(i, j))) {
