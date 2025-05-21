@@ -1,12 +1,11 @@
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.Dimension;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
 
 
 import javax.sound.sampled.*;
@@ -615,7 +614,7 @@ public class FenetrePrincipal extends JFrame {
                     else {
                         System.out.println("n'est censé jamais arriver");
                     }
-                    System.out.println("i : " + i);
+                   // System.out.println("i : " + i);
                     hexPlateau.setUnitsIA(new AbstractMap.SimpleEntry<Integer, Integer>(hexPlateau.getHistoryPlayerUnits().get(i).getKey(),hexPlateau.getHistoryPlayerUnits().get(i).getValue()));
                 }
                 buttonEndTurn.doClick();
@@ -629,9 +628,28 @@ public class FenetrePrincipal extends JFrame {
 
             // Tu peux remettre l’explication du jeu ici si besoin
             //topPanel.add(explicationJeu);
+            if (partie.getJoueurActuel() == partie.getJoueur2()) {
+                for (int i = 0; i < hexPlateau.getPlateau().getLignes(); i++) {
+                    for (int j = 0; j < hexPlateau.getPlateau().getColonnes(); j++) {
+                        Unite u = hexPlateau.getPlateau().getCase(i, j).getUnite();
+                        if (partie.getJoueur2().getUnites().contains(u)) {
+                            Random random = new Random();
+                            Map<Point,Integer> coordsPossibles = hexPlateau.calculerCasesAccessibles(i, j, u);
+
+                            // nombre aléatoire entre 0 et tailleListe - 1
+                            Point randomKey = new ArrayList<>(coordsPossibles.keySet()).get(random.nextInt(coordsPossibles.size()));
+                            System.out.println(randomKey);
+                            hexPlateau.getPlateau().getCase(i, j).retirerUnite();
+                            hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                        }
+                    }
+                }
+                buttonEndTurn.doClick();
+            }
 
             mainGamePanel.revalidate();
             mainGamePanel.repaint();
+
 
         }
 

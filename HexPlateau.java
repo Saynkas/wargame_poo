@@ -87,7 +87,7 @@ public class HexPlateau extends JPanel {
 
     //interaction avec le plateau
     private void gererClick(int x, int y) {
-        System.out.println("x : " + x + " y : " + y);
+       // System.out.println("x : " + x + " y : " + y);
         Joueur joueurActuel = partie.getJoueurActuel();
 
         // Parcours de toutes les cases du plateau
@@ -333,6 +333,63 @@ public class HexPlateau extends JPanel {
         }
     }
 
+    // Calcul des cases accessibles et mises en cache (avec Djikstra) test
+    public Map<Point, Integer> calculerCasesAccessibles(int ligneInitial, int colonneInitial, Unite uniteSelectionnee) {
+        // On initialise le cache
+        Map<Point, Integer> casesAccessiblesCache = new HashMap<>();
+        // On crée une file
+        PriorityQueue<NoeudDeplacement> queue = new PriorityQueue<>(Comparator.comparingInt(n -> n.coutTotal));
+        // On ajoute la case de départ à la file avec un coût de 0
+        queue.add(new NoeudDeplacement(ligneInitial, colonneInitial, 0));
+        casesAccessiblesCache.put(new Point(ligneInitial, colonneInitial), 0);
+
+        // Tant que la file n'est pas vide :
+        while (!queue.isEmpty()) {
+            // On sélectionne une case
+            NoeudDeplacement current = queue.poll();
+
+            // Si le coût de déplacement total actuel est supérieur au coût précédemment trouvé pour cette case OU à maxint (impossible)
+            if (current.coutTotal > casesAccessiblesCache.getOrDefault(new Point(current.ligne, current.colonne), Integer.MAX_VALUE)) {
+                // On passe
+                continue;
+            }
+
+            // On détermine les cases voisines
+            int[][] directions = (current.colonne % 2 == 0) ?
+                    new int[][]{ {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, 0}, {1, 1} } :
+                    new int[][]{ {-1, -1}, {-1, 0}, {0, -1}, {0, 1}, {1, -1}, {1, 0} };
+
+            // Pour chaque case voisine :
+            for (int[] dir : directions) {
+                int newLigne = current.ligne + dir[0];
+                int newColonne = current.colonne + dir[1];
+
+                // On vérifie que la case voisine existe (pas en dehors du plateau)
+                if (newLigne >= 0 && newLigne < plateau.getLignes() && newColonne >= 0 && newColonne < plateau.getColonnes()) {
+
+                    // On calcule le coût de déplacement jusqu'à cette case depuis la case actuelle
+                    HexCase hexCase = plateau.getCase(newLigne, newColonne);
+                    int terrainCost = hexCase.getTerrain().getCoutDeDeplacement();
+                    int totalCost = current.coutTotal + terrainCost;
+                    Point key = new Point(newLigne, newColonne);
+
+                    // Si la case est 1. libre, 2. dans la distance atteignable par l'unité et
+                    // 3. la case n'est pas dans le cache OU on a trouvé un chemin plus court que la valeur déjà en cache
+                    if (( !hexCase.estOccupee() || hexCase.contientUniteEnnemie(uniteSelectionnee) )
+                            && totalCost <= uniteSelectionnee.getDeplacement()
+                            && (!casesAccessiblesCache.containsKey(key) || totalCost < casesAccessiblesCache.get(key))) {
+
+                        // On rajoute la case au cache avec ses coordonnées et son coût d'accès
+                        casesAccessiblesCache.put(key, totalCost);
+                        // On rajoute cette case à la file
+                        queue.add(new NoeudDeplacement(newLigne, newColonne, totalCost));
+                    }
+                }
+            }
+        }
+        return casesAccessiblesCache;
+    }
+
     private Point hexToPixel(int col, int row) {
         int x = (int) (RADIUS * Math.sqrt(3) * (col + 0.5 * (row % 2)));
         int y = (int) (RADIUS * 1.5 * row);
@@ -523,11 +580,11 @@ public class HexPlateau extends JPanel {
     public void setUnitsIA(AbstractMap.SimpleEntry<Integer, Integer> coords) {
         //System.out.println("coords ia x : " + (1000-coords.getKey()) + " y : " + (600-coords.getValue())); // todo utiliser lig,col pour trouver où cliquer
         Point center = hexToPixel(coords.getValue(), coords.getKey());
-        System.out.println("original x : " + coords.getKey() + " y  : "+coords.getValue());
+        //System.out.println("original x : " + coords.getKey() + " y  : "+coords.getValue());
         Point center2 = hexToPixel(12-coords.getValue(), 18-coords.getKey());
-        System.out.println("mirroir x : " + (18-coords.getKey()) + " y : " + (12-coords.getValue()));
-        System.out.println("center x : " + center.x + " y : " + center.y);
-        System.out.println("center2 x : " + center2.x + " y : " + center2.y);
+        //System.out.println("mirroir x : " + (18-coords.getKey()) + " y : " + (12-coords.getValue()));
+       // System.out.println("center x : " + center.x + " y : " + center.y);
+      //  System.out.println("center2 x : " + center2.x + " y : " + center2.y);
         //System.out.println("test x : " + (1000-center.x-30) + " y : " + (600-center.y-30));
         MouseEvent clickEvent = new MouseEvent(
                 this,
@@ -549,5 +606,9 @@ public class HexPlateau extends JPanel {
 
     public ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> getHistoryPlayerUnits() {
         return historyPlayerUnits;
+    }
+
+    public Plateau getPlateau() {
+        return plateau;
     }
 }
