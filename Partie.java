@@ -11,12 +11,14 @@ public class Partie implements Serializable {
     private Plateau plateau;
     private String mode;
     private int toursDef;
+    private int defenseur;
 
     public Partie() {
         this.toursInd = 1;
         this.turnNumber = 1;
         this.partieCommence = false;
         this.mode = "annihilation";
+        this.defenseur = 1;
     }
 
 
@@ -38,10 +40,10 @@ public class Partie implements Serializable {
 
     public boolean partieTerminee() {
         if (this.mode == "annihilation") {
-            return joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes();
+            return !(joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes());
         }
         else {
-            return turnNumber > toursDef + 1;
+            return (turnNumber > toursDef + 1) || !(joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes());
         }
     }
 
@@ -106,6 +108,14 @@ public class Partie implements Serializable {
 
     public void setToursDef(int toursDef) {
         this.toursDef = toursDef;
+    }
+
+    public int getDefenseur() {
+        return defenseur;
+    }
+
+    public void setDefenseur(int defenseur) {
+        this.defenseur = defenseur;
     }
 
 }

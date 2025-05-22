@@ -266,7 +266,7 @@ public class HexPlateau extends JPanel implements Serializable {
                                         hexCase.retirerUnite();
                                         plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                         hexCase.placerUnite(uniteSelectionnee);
-                                        if (!partie.partieTerminee()) {
+                                        if (partie.partieTerminee()) {
                                             fenetrePrincipale.finDePartie();
                                         }
                                     }

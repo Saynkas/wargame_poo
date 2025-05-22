@@ -4,7 +4,7 @@ import java.io.IOException;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import java.awt.Dimension;
+
 import java.util.*;
 
 import java.io.Serializable;
@@ -215,6 +215,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         private String mode;
         private String tours_string;
         private int tours = 10;
+        private int defenseur = 1;
 
         public ModeDialog(JFrame parent) {
             super(parent, "Choisissez la condition de victoire", true);
@@ -267,10 +268,15 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             annBtn.setFont(customFont);
             annBtn.setBackground(new Color(88, 31, 14));
             annBtn.setForeground(new Color(239, 200, 112));
-            JButton defBtn = new JButton("Défense");
-            defBtn.setFont(customFont);
-            defBtn.setBackground(new Color(88, 31, 14));
-            defBtn.setForeground(new Color(239, 200, 112));
+
+            JButton defBtn1 = new JButton("Défense J1");
+            defBtn1.setFont(customFont);
+            defBtn1.setBackground(new Color(88, 31, 14));
+            defBtn1.setForeground(new Color(239, 200, 112));
+            JButton defBtn2 = new JButton("Défense J2");
+            defBtn2.setFont(customFont);
+            defBtn2.setBackground(new Color(88, 31, 14));
+            defBtn2.setForeground(new Color(239, 200, 112));
 
             annBtn.addActionListener(e -> {
                 mode = "annihilation";
@@ -278,39 +284,53 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                 cardLayout.show(mainPanel, "plateau");
             });
 
-            defBtn.addActionListener(e -> {
-                tours_string = toursField.getText().trim();
-                if (!tours_string.isEmpty()) {
-                    try {
-                        tours = Integer.parseInt(tours_string);
-                        if (tours > 1) {
-                            JOptionPane.showMessageDialog(this, "Le joueur 1 va devoir survivre " + tours + " tours.", "Information", JOptionPane.INFORMATION_MESSAGE);
-                            mode = "defense";
-                            dispose();
-                            cardLayout.show(mainPanel, "plateau");
-                        }
-                        else {
-                            JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre supérieur à 1.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } catch (Exception error) {
-                        JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre de tours.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                }
-            });
+            defBtn1.addActionListener(e -> handleDefenseMode(1));
+            defBtn2.addActionListener(e -> handleDefenseMode(2));
 
             gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
             fondPanel.add(annBtn, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-            fondPanel.add(defBtn, gbc);
+            gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
+            fondPanel.add(defBtn1, gbc);
+
+            gbc.gridx = 1; gbc.gridy = 2;
+            fondPanel.add(defBtn2, gbc);
 
             setContentPane(fondPanel);
         }
 
+        private void handleDefenseMode(int defendingPlayer) {
+            tours_string = toursField.getText().trim();
+            if (!tours_string.isEmpty()) {
+                try {
+                    tours = Integer.parseInt(tours_string);
+                    if (tours > 1) {
+                        JOptionPane.showMessageDialog(
+                            this, 
+                            "Le joueur " + defendingPlayer + " va devoir survivre " + tours + " tours.", "Information", JOptionPane.INFORMATION_MESSAGE
+                        );
+                        mode = "defense";
+                        defenseur = defendingPlayer;
+                        dispose();
+                        cardLayout.show(mainPanel, "plateau");
+                    } else {
+                        showError("Veuillez entrer un nombre supérieur à 1.");
+                    }
+                } catch (NumberFormatException error) {
+                    showError("Veuillez entrer un nombre valide.");
+                }
+            } else {
+                showError("Veuillez entrer un nombre de tours.");
+            }
+        }
+
+        private void showError(String message) {
+            JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+
         public String getMode() { return mode; }
         public int getTours() { return tours; }
+        public int getDefenseur() { return defenseur; }
     }
 
 
@@ -525,6 +545,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             if (mode != null) {
                 partie.setMode(mode);
                 partie.setToursDef(modeDialog.getTours());
+                partie.setDefenseur(modeDialog.getDefenseur());
             }
             else {
                 partie.setMode("annihilation");
@@ -680,24 +701,41 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
     public void finDePartie() {
         topPanel.remove(buttonEndTurn);
+        
+        String gagnant;
+        String message;
+        
         if (partie.getMode() == "annihilation") {
+            boolean joueur1Gagne = partie.getJoueur1().aDesUnitesVivantes();
+            
             if (partie.getJoueur2().isEstIA()) {
-                if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur a gagné la partie !");
-                else JOptionPane.showMessageDialog(null, "L'IA a gagné la partie !");
+                message = joueur1Gagne ? "Le joueur a gagné la partie !" : "L'IA a gagné la partie !";
             }
             else {
-                if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur1 + " a gagné la partie !");
-                else JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur2 + " a gagné la partie !");
+                gagnant = joueur1Gagne ? pseudoJoueur1 : pseudoJoueur2;
+                message = "Le joueur " + gagnant + " a gagné la partie !";
             }
-        }
-        else {
-            if (partie.getJoueur1().aDesUnitesVivantes()) {
-                JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur1 + " a gagné en survivant " + partie.getToursDef() + " tours !");
+        } else {
+            int defenseur = partie.getDefenseur();
+            boolean defenseurSurvit;
+            if (defenseur == 1) {
+                defenseurSurvit = partie.getJoueur1().aDesUnitesVivantes();
             }
             else {
-                JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur2 + " a gagné en décimant l'ennmi en moins de " + partie.getToursDef() + " tours !");
+                defenseurSurvit = partie.getJoueur2().aDesUnitesVivantes();
             }
+            int tours = partie.getToursDef();
+            
+            gagnant = defenseur == 1 ? 
+                (defenseurSurvit ? pseudoJoueur1 : pseudoJoueur2) : // si le défenseur est le J1, s'il a survécu, il est le gagnant
+                (defenseurSurvit ? pseudoJoueur2 : pseudoJoueur1); // sinon, si le défenseur est le J2, s'il a survécu, il est le gagnant
+
+            String action = defenseurSurvit ? " a gagné en survivant " : " a gagné en décimant l'ennemi en moins de ";
+
+            message = "Le joueur " + gagnant + action + tours + " tours !";
         }
+        
+        JOptionPane.showMessageDialog(null, message);
     }
 
 
@@ -907,10 +945,8 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         mainGamePanel.revalidate();
         mainGamePanel.repaint();
 
-        if (partie.getMode() == "defense") {
-            if (partie.partieTerminee()) {
-                finDePartie();
-            }
+        if (partie.partieTerminee()) {
+            finDePartie();
         }
 
         
