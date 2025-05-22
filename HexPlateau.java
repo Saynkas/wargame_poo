@@ -217,7 +217,7 @@ public class HexPlateau extends JPanel implements Serializable {
                                                     caseCible.retirerUnite();
                                                 }
                         
-                                                uniteSelectionnee.setAAgitCeTour(true);
+                                                //uniteSelectionnee.setAAgitCeTour(true);
                                                 estEntrainDeplace = false;
                                                 casesAccessiblesCache = null;
                                                 rendreCasesAutourVisibles(fromRow, fromCol, joueurActuel);
@@ -245,7 +245,7 @@ public class HexPlateau extends JPanel implements Serializable {
                         }                        
                         // Gestion de l’attaque si on est en train de déplacer une unité
                         // et que la case ciblée est occupée par une unité ennemie accessible
-                        if (hexCase.estOccupee() && casesAccessiblesCache != null && casesAccessiblesCache.containsKey(new Point(i, j))) {
+                        if (hexCase.estOccupee() && casesAccessiblesCache != null) { //&& casesAccessiblesCache.containsKey(new Point(i, j))) {
                             Unite cible = hexCase.getUnite();
 
                             // Vérifier que la cible appartient à l'adversaire
@@ -271,7 +271,7 @@ public class HexPlateau extends JPanel implements Serializable {
                                         }
                                     }
 
-                                    uniteSelectionnee.setAAgitCeTour(true);
+                                   // uniteSelectionnee.setAAgitCeTour(true);
                                     cible.setEstAttaque(true);
                                     estEntrainDeplace = false;
                                     casesAccessiblesCache = null;
