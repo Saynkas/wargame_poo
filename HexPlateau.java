@@ -1,8 +1,8 @@
 
-import java.io.Serializable;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 import java.util.*;
 import javax.swing.*;
 
@@ -11,6 +11,7 @@ import javax.swing.*;
 public class HexPlateau extends JPanel implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final int MAX_UNITES_PAR_JOUEUR = 5; // Limite d'unités par joueur
 
     private static final int RADIUS = 30; //diametre de l'hexagone
 
@@ -111,38 +112,48 @@ public class HexPlateau extends JPanel implements Serializable {
 
                     // Si on est en phase de placement d’une nouvelle unité
                     if (placementNouvelleUnite) {
-
-                        // La case doit être vide pour placer l’unité
+                        // La case doit être vide pour placer l'unité
                         if (!hexCase.estOccupee()) {
-
+                            // Vérifier si le joueur n'a pas déjà atteint la limite d'unités
+                            int unitesJoueur = (partie.getToursInd() % 2 == 1) ? 
+                                              partie.getJoueur1().getUnites().size() : 
+                                              partie.getJoueur2().getUnites().size();
+                            
+                            if (unitesJoueur > MAX_UNITES_PAR_JOUEUR - 1) {
+                                JOptionPane.showMessageDialog(null, "Vous avez atteint la limite maximale d'unités (" + MAX_UNITES_PAR_JOUEUR + ")");
+                                uniteSelectionnee = null;
+                                return;
+                            }
+                    
                             // Tour impair -> placement possible dans les colonnes < 3
                             if (partie.getToursInd() % 2 == 1) {
                                 if (j <= 3) {
                                     historyPlayerUnits.add(new AbstractMap.SimpleEntry<>(i, j));
                                     hexCase.placerUnite(uniteSelectionnee);
+                                    partie.getJoueur1().ajouterUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
                                     hexCase.getUnite().setAAgitCeTour(true);
                                     rendreCasesAutourVisibles(i, j, joueurActuel);
                                     repaint();
-                                }else{
-                                    JOptionPane.showMessageDialog(null, "respecte les limite a gauche");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "respectez les limites a gauche");
                                 }
                             } 
                             // Tour pair -> placement possible dans les colonnes > (total - 3)
                             else if (partie.getToursInd() % 2 == 0) {
                                 if (j >= (plateau.getColonnes() - 4)) {
                                     hexCase.placerUnite(uniteSelectionnee);
+                                    partie.getJoueur2().ajouterUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
                                     hexCase.getUnite().setAAgitCeTour(true);
                                     rendreCasesAutourVisibles(i, j, joueurActuel);
                                     repaint();
-                                }else{
-                                    JOptionPane.showMessageDialog(null, "respecte les limite a droite");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "respectez les limites a droite");
                                 }
                             }
-
                         }
                         return; // Fin du traitement si on était en placement
                     } 
