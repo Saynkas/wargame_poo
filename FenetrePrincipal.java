@@ -23,6 +23,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
     private String pseudoJoueur1;
     private String pseudoJoueur2;
+    private String mode;
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private HexPlateau hexPlateau;
@@ -207,6 +208,109 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
         public String getJoueur1() { return joueur1; }
         public String getJoueur2() { return joueur2; }
+    }
+
+    class ModeDialog extends JDialog {
+        private JTextField toursField;
+        private String mode;
+        private String tours_string;
+        private int tours = 10;
+
+        public ModeDialog(JFrame parent) {
+            super(parent, "Choisissez la condition de victoire", true);
+            setSize(500, 300);
+            setLocationRelativeTo(parent);
+            setLayout(new BorderLayout());
+
+            JPanel fondPanel = new JPanel() {
+                Image img = new ImageIcon("backGroundImages/parchemin.jpg").getImage();
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                }
+            };
+            fondPanel.setLayout(new GridBagLayout());
+            fondPanel.setOpaque(false);
+
+            Font customFont;
+            try {
+                customFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/police/papyrus.ttf"))
+                                .deriveFont(Font.PLAIN, 18f);
+            } catch (Exception e) {
+                customFont = new Font("Serif", Font.BOLD, 18);
+            }
+
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(10, 10, 10, 10);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel label1 = new JLabel("Nombre de tours à survivre :");
+            label1.setFont(customFont);
+            label1.setForeground(new Color(91, 62, 29));
+            gbc.gridx = 0; gbc.gridy = 1;
+            fondPanel.add(label1, gbc);
+
+            toursField = new JTextField();
+            toursField.setFont(customFont);
+            toursField.setPreferredSize(new Dimension(200, 30));
+            toursField.setForeground(Color.BLACK);
+            toursField.setBackground(new Color(255, 255, 255));
+            toursField.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            toursField.setOpaque(true);
+
+            gbc.gridx = 1;
+            gbc.gridy = 1;
+            fondPanel.add(toursField, gbc);
+
+            JButton annBtn = new JButton("Annihilation");
+            annBtn.setFont(customFont);
+            annBtn.setBackground(new Color(88, 31, 14));
+            annBtn.setForeground(new Color(239, 200, 112));
+            JButton defBtn = new JButton("Défense");
+            defBtn.setFont(customFont);
+            defBtn.setBackground(new Color(88, 31, 14));
+            defBtn.setForeground(new Color(239, 200, 112));
+
+            annBtn.addActionListener(e -> {
+                mode = "annihilation";
+                dispose();
+                cardLayout.show(mainPanel, "plateau");
+            });
+
+            defBtn.addActionListener(e -> {
+                tours_string = toursField.getText().trim();
+                if (!tours_string.isEmpty()) {
+                    try {
+                        tours = Integer.parseInt(tours_string);
+                        if (tours > 1) {
+                            JOptionPane.showMessageDialog(this, "Le joueur 1 va devoir survivre " + tours + " tours.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            mode = "defense";
+                            dispose();
+                            cardLayout.show(mainPanel, "plateau");
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre supérieur à 1.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception error) {
+                        JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre de tours.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
+            gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+            fondPanel.add(annBtn, gbc);
+
+            gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+            fondPanel.add(defBtn, gbc);
+
+            setContentPane(fondPanel);
+        }
+
+        public String getMode() { return mode; }
+        public int getTours() { return tours; }
     }
 
 
@@ -413,6 +517,20 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             pseudoJoueur1 = pseudoDialog.getJoueur1();
             pseudoJoueur2 = pseudoDialog.getJoueur2();
 
+            ModeDialog modeDialog = new ModeDialog(this);
+            modeDialog.setVisible(true);
+
+            mode = modeDialog.getMode();
+
+            if (mode != null) {
+                partie.setMode(mode);
+                partie.setToursDef(modeDialog.getTours());
+            }
+            else {
+                partie.setMode("annihilation");
+                JOptionPane.showMessageDialog(this, "Un problème est survenu. Vous jouerez en mode Annihilation.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+            }
+
             if (pseudoJoueur1 != null && pseudoJoueur2 != null) {
                 Joueur j1 = new Joueur(1, pseudoJoueur1);
                 Joueur j2 = new Joueur(2, pseudoJoueur2);
@@ -437,6 +555,21 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             pseudoJoueur1 = "Joueur";
             pseudoJoueur2 = "IA";
             playSound("assets/sounds/click_fantasy_ok.wav");
+
+            ModeDialog modeDialog = new ModeDialog(this);
+            modeDialog.setVisible(true);
+
+            mode = modeDialog.getMode();
+
+            if (mode != null) {
+                partie.setMode(mode);
+                partie.setToursDef(modeDialog.getTours());
+            }
+            else {
+                partie.setMode("annihilation");
+                JOptionPane.showMessageDialog(this, "Un problème est survenu. Vous jouerez en mode Annihilation.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+            }
+
             Plateau plateau = new Plateau(12, 18);
             hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn, this);
             JPanel jeuPanelIA = creeJeuPanelIA();
@@ -547,13 +680,23 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
     public void finDePartie() {
         topPanel.remove(buttonEndTurn);
-        if (partie.getJoueur2().isEstIA()) {
-            if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur a gagné la partie !");
-            else JOptionPane.showMessageDialog(null, "L'IA a gagné la partie !");
+        if (partie.getMode() == "annihilation") {
+            if (partie.getJoueur2().isEstIA()) {
+                if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur a gagné la partie !");
+                else JOptionPane.showMessageDialog(null, "L'IA a gagné la partie !");
+            }
+            else {
+                if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur1 + " a gagné la partie !");
+                else JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur2 + " a gagné la partie !");
+            }
         }
         else {
-            if (partie.getJoueur1().aDesUnitesVivantes()) JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur1 + " a gagné la partie !");
-            else JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur2 + " a gagné la partie !");
+            if (partie.getJoueur1().aDesUnitesVivantes()) {
+                JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur1 + " a gagné en survivant " + partie.getToursDef() + " tours !");
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Le joueur " + pseudoJoueur2 + " a gagné en décimant l'ennmi en moins de " + partie.getToursDef() + " tours !");
+            }
         }
     }
 
@@ -764,7 +907,13 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         mainGamePanel.revalidate();
         mainGamePanel.repaint();
 
+        if (partie.getMode() == "defense") {
+            if (partie.partieTerminee()) {
+                finDePartie();
+            }
+        }
 
+        
         }
     });
 

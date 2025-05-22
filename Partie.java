@@ -9,11 +9,14 @@ public class Partie implements Serializable {
     private int turnNumber; // total des tours (actions de j1 et j2)
     private boolean partieCommence;
     private Plateau plateau;
+    private String mode;
+    private int toursDef;
 
     public Partie() {
         this.toursInd = 1;
         this.turnNumber = 1;
         this.partieCommence = false;
+        this.mode = "annihilation";
     }
 
 
@@ -34,7 +37,12 @@ public class Partie implements Serializable {
     }
 
     public boolean partieTerminee() {
-        return joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes();
+        if (this.mode == "annihilation") {
+            return joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes();
+        }
+        else {
+            return turnNumber > toursDef + 1;
+        }
     }
 
     public Joueur getJoueur1() {
@@ -82,6 +90,22 @@ public class Partie implements Serializable {
 
     public void setPlateau(Plateau plateau) {
         this.plateau = plateau;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    public int getToursDef() {
+        return toursDef;
+    }
+
+    public void setToursDef(int toursDef) {
+        this.toursDef = toursDef;
     }
 
 }
