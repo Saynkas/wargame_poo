@@ -1,22 +1,17 @@
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.*;
+import javax.sound.sampled.*;
+import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import java.awt.Dimension;
-import java.util.*;
-
-import java.io.Serializable;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-
-
-
-import javax.sound.sampled.*;
-import javax.swing.*;
 
 public class FenetrePrincipal extends JFrame implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -1058,6 +1053,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
 
     private JButton createUnitButton(String unitName, String imagePath) {
+
         JButton button = createStyledButton(unitName); // Utilisation de ton style personnalisé
 
         button.setPreferredSize(new Dimension(200, 60));
