@@ -105,6 +105,7 @@ public class HexPlateau extends JPanel implements Serializable {
     private void gererClick(int x, int y) {
        // System.out.println("x : " + x + " y : " + y);
         Joueur joueurActuel = partie.getJoueurActuel();
+        System.out.println(partie.partieTerminee());
 
         // Parcours de toutes les cases du plateau
         for (int i = 0; i < plateau.getLignes(); i++) {
@@ -288,6 +289,7 @@ public class HexPlateau extends JPanel implements Serializable {
                                         plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                         hexCase.placerUnite(uniteSelectionnee);
                                         if (partie.partieTerminee()) {
+                                            System.out.println(partie.getMode());
                                             fenetrePrincipale.finDePartie();
                                         }
                                     }
@@ -544,18 +546,9 @@ public class HexPlateau extends JPanel implements Serializable {
                     g2d.fill(hex);
                 }
 
-
-                if (estEntrainDeplace && casesAccessiblesCache.containsKey(new Point(row, col))) {
-                    int cout = casesAccessiblesCache.get(new Point(row, col));
-                    g2d.setColor(Color.BLACK);
-                    g2d.drawString(String.valueOf(cout), center.x - 3, center.y + 5);
-                }
-    
                 g2d.setColor(Color.BLACK);
                 g2d.draw(hex);
                 Joueur joueurActuel = partie.getJoueurActuel();
-                hexCase.dessinerUnite(g2d, center.x, center.y);
-
                 
                 if (!hexCase.estVisiblePour(joueurActuel)) {
                     /*Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
@@ -572,6 +565,15 @@ public class HexPlateau extends JPanel implements Serializable {
                         g2d.setPaint(texture);
                         g2d.fill(hex);
                     }
+                }
+                else {
+                    hexCase.dessinerUnite(g2d, center.x, center.y);
+                }
+
+                if (estEntrainDeplace && casesAccessiblesCache.containsKey(new Point(row, col))) {
+                    int cout = casesAccessiblesCache.get(new Point(row, col));
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawString(String.valueOf(cout), center.x - 3, center.y + 5);
                 }
 
                 // limite du joueur 1

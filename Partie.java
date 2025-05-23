@@ -32,6 +32,8 @@ public class Partie implements Serializable {
         toursInd = 1;
         turnNumber = 1;
         partieCommence = false;
+        this.mode = "annihilation";
+        this.defenseur = 1;
     }
 
     public int getToursInd() {
@@ -43,11 +45,11 @@ public class Partie implements Serializable {
     }
 
     public boolean partieTerminee() {
-        if (this.mode == "annihilation") {
+        if (this.mode.equals("annihilation")) {
             return !(joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes());
         }
         else {
-            return (turnNumber > toursDef + 1) || !(joueur1.aDesUnitesVivantes() && joueur2.aDesUnitesVivantes());
+            return (turnNumber > toursDef) && (defenseur == 1 ? joueur1.aDesUnitesVivantes() : joueur2.aDesUnitesVivantes());
         }
     }
 

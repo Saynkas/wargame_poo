@@ -537,21 +537,21 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
             mode = modeDialog.getMode();
 
-            if (mode != null) {
-                partie.setMode(mode);
-                partie.setToursDef(modeDialog.getTours());
-                partie.setDefenseur(modeDialog.getDefenseur());
-            }
-            else {
-                partie.setMode("annihilation");
-                JOptionPane.showMessageDialog(this, "Un problème est survenu. Vous jouerez en mode Annihilation.", "Avertissement", JOptionPane.WARNING_MESSAGE);
-            }
-
             if (pseudoJoueur1 != null && pseudoJoueur2 != null) {
                 Joueur j1 = new Joueur(1, pseudoJoueur1);
                 Joueur j2 = new Joueur(2, pseudoJoueur2);
                 this.partie = new Partie(j1, j2);
                 partie.setJoueurActuel(j1);
+
+                if (mode != null) {
+                    partie.setMode(mode);
+                    partie.setToursDef(modeDialog.getTours());
+                    partie.setDefenseur(modeDialog.getDefenseur());
+                }
+                else {
+                    partie.setMode("annihilation");
+                    JOptionPane.showMessageDialog(this, "Un problème est survenu. Vous jouerez en mode Annihilation.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+                }
 
                 Plateau plateau = new Plateau(12, 18);
                 partie.setPlateau(plateau); // si tu as bien ajouté ce champ
@@ -660,40 +660,6 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         });
 
         return button;
-    }
-
-    private void endTurn(int joueur, int tour, Partie partie) {
-        // Créer ou mettre à jour le JLabel existant pour afficher le message
-        String message = "Le tour " + tour + " du joueur " + joueur + " commence !";
-        messageStatusLabel.setText(message);
-
-        // Optionnel : Changer la couleur du message en fonction du joueur
-        if (joueur == 1) {
-            messageStatusLabel.setForeground(new Color(0x00FF00)); // Vert pour le joueur 1
-        } else {
-            messageStatusLabel.setForeground(new Color(0xFF0000)); // Rouge pour le joueur 2
-        }
-
-        // Créer un Timer pour faire disparaître le message après 2 secondes
-        Timer timer = new Timer(2000, e -> {
-            messageStatusLabel.setText("");  // Effacer le message après 2 secondes
-        });
-        timer.setRepeats(false);
-        timer.start();
-
-        // Réinitialiser les actions du joueur pour ce tour
-        if (joueur == 1) {
-            partie.getJoueur1().resetAAgitCeTour();
-        } else {
-            partie.getJoueur2().resetAAgitCeTour();
-        }
-
-        // Réinitialiser les unités du joueur actuel
-        Joueur joueurActuel = partie.getJoueurActuel();
-        for (Unite unite : joueurActuel.getUnites()) {
-            unite.recupererPV(); // Récupérer des points de vie
-            unite.reinitialiserTour(); // Réinitialiser l'état des unités pour le tour suivant
-        }
     }
 
     public void finDePartie() {
@@ -912,9 +878,6 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                                         hexPlateau.getPlateau().getCase(p.x, p.y).retirerUnite();
                                         hexPlateau.getPlateau().getCase(i, j).retirerUnite();
                                         hexPlateau.getPlateau().getCase(p.x, p.y).placerUnite(u);
-                                        if (!partie.partieTerminee()) {
-                                            finDePartie();
-                                        }
                                     }
                                 }
                             }
@@ -941,14 +904,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
         mainGamePanel.revalidate();
         mainGamePanel.repaint();
-
-        if (partie.partieTerminee()) {
-            finDePartie();
-        }
-
-        
-        }
-    });
+    }});
 
     // Création du bouton pour démarrer la partie
     JButton startGame = new JButton("Démarrer la partie !");
@@ -1216,6 +1172,12 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         // Créer ou mettre à jour le JLabel existant pour afficher le message
         String message = "Le tour " + tour + " du joueur " + joueur + " commence !";
         messageStatusLabel.setText(message);
+
+        System.out.println("Fin de partie defense : " + (partie.getMode().equals("defense") && partie.partieTerminee()));
+
+        if (partie.getMode().equals("defense") && partie.partieTerminee()) {
+            finDePartie();
+        }
 
         // Optionnel : Changer la couleur du message en fonction du joueur
         if (joueur == 1) {
