@@ -185,6 +185,7 @@ public class HexPlateau extends JPanel implements Serializable {
                             estEntrainDeplace = true;
                             oldHexCase = hexCase;
                             calculerCasesAccessibles();
+                            recalculerVisibiliteGlobale(joueurActuel);
                             rendreCasesAutourVisibles(i, j, joueurActuel, true);
                             repaint();
                         }
