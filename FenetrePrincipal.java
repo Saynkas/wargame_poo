@@ -536,6 +536,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             modeDialog.setVisible(true);
 
             mode = modeDialog.getMode();
+            System.out.println("mode " + mode);
 
             if (pseudoJoueur1 != null && pseudoJoueur2 != null) {
                 Joueur j1 = new Joueur(1, pseudoJoueur1);
@@ -577,16 +578,24 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             modeDialog.setVisible(true);
 
             mode = modeDialog.getMode();
+            System.out.println("mode " + mode);
 
+            Joueur j1 = new Joueur(1, pseudoJoueur1);
+            Joueur j2 = new Joueur(2, pseudoJoueur2);
+            this.partie = new Partie(j1, j2);
+            partie.setJoueurActuel(j1);
             if (mode != null) {
-                partie.setMode(mode);
+                this.partie.setMode(mode);
+                System.out.println("test : " + (this.partie.getMode()));
                 partie.setToursDef(modeDialog.getTours());
                 partie.setDefenseur(modeDialog.getDefenseur());
             }
             else {
                 partie.setMode("annihilation");
+                System.out.println("narrive jamais");
                 JOptionPane.showMessageDialog(this, "Un problème est survenu. Vous jouerez en mode Annihilation.", "Avertissement", JOptionPane.WARNING_MESSAGE);
             }
+
 
             Plateau plateau = new Plateau(12, 18);
             hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn, this);
@@ -814,96 +823,109 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
     // Bouton de fin de tour
     buttonEndTurn.addActionListener(e -> {
-        partie.setToursInd(partie.getToursInd() + 1);
+        if (partie.getJoueur1().getUnites().isEmpty()) {
+            System.out.println("Joueur actuel" + partie.getJoueurActuel().getId());
+            System.out.println("Aucune unité présente, ne pas changer de tour.");
+            System.out.println("Joueur " + partie.getJoueurActuel().getId() + " n'a pas des unités vivantes : " + partie.getJoueurActuel().aDesUnitesVivantes());
+        }
+        else {
+            partie.setToursInd(partie.getToursInd() + 1);
 
-        mainGamePanel.remove(leftUnitsPanel);
-        mainGamePanel.remove(rightUnitsPanel);
-        if(partie.getToursInd() <= 2){
-            if (partie.getToursInd() % 2 == 1) {
-                // Tour du joueur 1
-                mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
-            } else {
-                // HARDCODER 1 UNITE DE CHAQUE TYPE A DES COORDONEES PRECISES QUI MARCHENT POUR L'INSTANT
-                String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
-                ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> listCoords = new ArrayList<>();
-                listCoords.add(new AbstractMap.SimpleEntry<>(777, 228));
-                listCoords.add(new AbstractMap.SimpleEntry<>(802, 273));
-                listCoords.add(new AbstractMap.SimpleEntry<>(774, 321));
-                listCoords.add(new AbstractMap.SimpleEntry<>(801, 361));
-                listCoords.add(new AbstractMap.SimpleEntry<>(776, 408));
-
-                for (int i = 0; i < 1; i++) {
-                    selectUnit(unitTypes[i], "right");
-                    hexPlateau.setUnitsIA(listCoords.get(i));
-                }
-                // Tour du joueur 2 (IA)
-                /*for (int i = 0; i < partie.getJoueur1().getUnites().size(); i++) { CODE DE MIROIR BUGGE, UNITES DE IA HARDCODEES POUR L'INSTANT
-                    switch (partie.getJoueur1().getUnites().get(i)) {
-                        case Archer _ -> selectUnit("Archer", "right");
-                        case Cavalerie _ -> selectUnit("Cavalerie", "right");
-                        case InfanterieLegere _ -> selectUnit("InfanterieLegere", "right");
-                        case InfanterieLourde _ -> selectUnit("InfanterieLourde", "right");
-                        case Mage _ -> selectUnit("Mage", "right");
-                        case null, default -> System.out.println("n'est censé jamais arriver");
-                    }
-                    hexPlateau.setUnitsIA(new AbstractMap.SimpleEntry<Integer, Integer>(hexPlateau.getHistoryPlayerUnits().get(i).getKey(),hexPlateau.getHistoryPlayerUnits().get(i).getValue()));
-                }*/
-                buttonEndTurn.doClick();
-            }
-        }else{
-
-            partie.setPartieCommence(true);
             mainGamePanel.remove(leftUnitsPanel);
             mainGamePanel.remove(rightUnitsPanel);
-            //topPanel.remove(explicationPrep);
+            if(partie.getToursInd() <= 2){
+                if (partie.getToursInd() % 2 == 1) {
+                    // Tour du joueur 1
+                    mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+                } else {
+                    // HARDCODER 1 UNITE DE CHAQUE TYPE A DES COORDONEES PRECISES QUI MARCHENT POUR L'INSTANT
+                    String[] unitTypes = {"Infanterie Lourde", "Archer", "Mage", "Infanterie Legere", "Cavalerie"};
+                    ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> listCoords = new ArrayList<>();
+                    listCoords.add(new AbstractMap.SimpleEntry<>(777, 228));
+                    listCoords.add(new AbstractMap.SimpleEntry<>(802, 273));
+                    listCoords.add(new AbstractMap.SimpleEntry<>(774, 321));
+                    listCoords.add(new AbstractMap.SimpleEntry<>(801, 361));
+                    listCoords.add(new AbstractMap.SimpleEntry<>(776, 408));
 
-            // Tu peux remettre l’explication du jeu ici si besoin
-            //topPanel.add(explicationJeu);
-            if (partie.getJoueurActuel() == partie.getJoueur2()) {
-                for (int i = 0; i < hexPlateau.getPlateau().getLignes(); i++) {
-                    for (int j = 0; j < hexPlateau.getPlateau().getColonnes(); j++) {
-                        Unite u = hexPlateau.getPlateau().getCase(i, j).getUnite();
-                        if (partie.getJoueur2().getUnites().contains(u)) {
-                            Random random = new Random();
-                            Map<Point,Integer> coordsPossibles = hexPlateau.calculerCasesAccessibles(i, j, u);
-                            for (Point p : coordsPossibles.keySet()) {
-                                // vérification s'il y a un ennemi en range
-                                if (partie.getJoueur1().getUnites().contains(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite()) && hexPlateau.getPlateau().getCase(i, j).getUnite() != null && !hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
-                                    System.out.println("tentative d'attaque");
-                                    u.attaquer(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite(), hexPlateau.getPlateau().getCase(p.x, p.y).getTerrain(), hexPlateau.calculerDistance(i, j, p.x, p.y));
-                                    //hexPlateau.getPlateau().getCase(i, j).getUnite().setAAgitCeTour(true);
-                                    // si on tue l'ennemi, prendre sa place
-                                    if (!hexPlateau.getPlateau().getCase(p.x, p.y).getUnite().estVivant()) {
-                                        System.out.println("unité tuée !");
-                                        hexPlateau.getPlateau().getCase(p.x, p.y).retirerUnite();
-                                        hexPlateau.getPlateau().getCase(i, j).retirerUnite();
-                                        hexPlateau.getPlateau().getCase(p.x, p.y).placerUnite(u);
+                    for (int i = 0; i < 5; i++) {
+                        selectUnit(unitTypes[i], "right");
+                        hexPlateau.setUnitsIA(listCoords.get(i));
+                    }
+                    // Tour du joueur 2 (IA)
+                    /*for (int i = 0; i < partie.getJoueur1().getUnites().size(); i++) { CODE DE MIROIR BUGGE, UNITES DE IA HARDCODEES POUR L'INSTANT
+                        switch (partie.getJoueur1().getUnites().get(i)) {
+                            case Archer _ -> selectUnit("Archer", "right");
+                            case Cavalerie _ -> selectUnit("Cavalerie", "right");
+                            case InfanterieLegere _ -> selectUnit("InfanterieLegere", "right");
+                            case InfanterieLourde _ -> selectUnit("InfanterieLourde", "right");
+                            case Mage _ -> selectUnit("Mage", "right");
+                            case null, default -> System.out.println("n'est censé jamais arriver");
+                        }
+                        hexPlateau.setUnitsIA(new AbstractMap.SimpleEntry<Integer, Integer>(hexPlateau.getHistoryPlayerUnits().get(i).getKey(),hexPlateau.getHistoryPlayerUnits().get(i).getValue()));
+                    }*/
+                    buttonEndTurn.doClick();
+                    buttonEndTurn.doClick();
+                    hexPlateau.fixPlayer1Invisible();
+                }
+            }else {
+
+                partie.setPartieCommence(true);
+                mainGamePanel.remove(leftUnitsPanel);
+                mainGamePanel.remove(rightUnitsPanel);
+                //topPanel.remove(explicationPrep);
+
+                // Tu peux remettre l’explication du jeu ici si besoin
+                //topPanel.add(explicationJeu);
+                if (partie.getJoueurActuel() == partie.getJoueur2()) {
+                    for (int i = 0; i < hexPlateau.getPlateau().getLignes(); i++) {
+                        for (int j = 0; j < hexPlateau.getPlateau().getColonnes(); j++) {
+                            Unite u = hexPlateau.getPlateau().getCase(i, j).getUnite();
+                            if (partie.getJoueur2().getUnites().contains(u)) {
+                                Random random = new Random();
+                                Map<Point, Integer> coordsPossibles = hexPlateau.calculerCasesAccessibles(i, j, u);
+                                for (Point p : coordsPossibles.keySet()) {
+                                    // vérification s'il y a un ennemi en range
+                                    if (partie.getJoueur1().getUnites().contains(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite()) && hexPlateau.getPlateau().getCase(i, j).getUnite() != null && !hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
+                                        System.out.println("tentative d'attaque");
+                                        u.attaquer(hexPlateau.getPlateau().getCase(p.x, p.y).getUnite(), hexPlateau.getPlateau().getCase(p.x, p.y).getTerrain(), hexPlateau.calculerDistance(i, j, p.x, p.y));
+                                        //hexPlateau.getPlateau().getCase(i, j).getUnite().setAAgitCeTour(true);
+                                        // si on tue l'ennemi, prendre sa place
+                                        if (!hexPlateau.getPlateau().getCase(p.x, p.y).getUnite().estVivant()) {
+                                            System.out.println("unité tuée !");
+                                            if (partie.partieTerminee()) {
+                                                System.out.println(partie.getMode());
+                                                finDePartie();
+                                            }
+                                            hexPlateau.getPlateau().getCase(p.x, p.y).retirerUnite();
+                                            hexPlateau.getPlateau().getCase(i, j).retirerUnite();
+                                            hexPlateau.getPlateau().getCase(p.x, p.y).placerUnite(u);
+                                        }
                                     }
                                 }
-                            }
-                            if (hexPlateau.getPlateau().getCase(i, j).getUnite() != null && !hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
-                                // nombre aléatoire entre 0 et tailleListe - 1
-                                Point randomKey = new ArrayList<>(coordsPossibles.keySet()).get(random.nextInt(coordsPossibles.size()));
-                               // System.out.println(randomKey);
-                                if (!hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).estOccupee()) {
-                                    hexPlateau.getPlateau().getCase(i, j).retirerUnite();
-                                    hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                                if (hexPlateau.getPlateau().getCase(i, j).getUnite() != null && !hexPlateau.getPlateau().getCase(i, j).getUnite().getAAgitCeTour()) {
+                                    // nombre aléatoire entre 0 et tailleListe - 1
+                                    Point randomKey = new ArrayList<>(coordsPossibles.keySet()).get(random.nextInt(coordsPossibles.size()));
+                                    // System.out.println(randomKey);
+                                    if (!hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).estOccupee()) {
+                                        hexPlateau.getPlateau().getCase(i, j).retirerUnite();
+                                        hexPlateau.getPlateau().getCase(randomKey.x, randomKey.y).placerUnite(u);
+                                    }
+                                    u.setAAgitCeTour(true);
                                 }
-                                u.setAAgitCeTour(true);
                             }
                         }
                     }
-                }
-                buttonEndTurn.doClick();
-                endTurn(partie.getJoueur1().getId(), partie.getTurnNumber(), partie);
-                partie.setTurnNumber(partie.getTurnNumber() + 1);
-            }
-            else {
-                endTurn(partie.getJoueur2().getId(), partie.getTurnNumber(), partie);
-            }
+                    endTurn(partie.getJoueur1().getId(), partie.getTurnNumber(), partie);
+                    partie.setTurnNumber(partie.getTurnNumber() + 1);
+                    buttonEndTurn.doClick();
 
-        mainGamePanel.revalidate();
-        mainGamePanel.repaint();
+                } else {
+                    endTurn(partie.getJoueur2().getId(), partie.getTurnNumber(), partie);
+                }
+
+                mainGamePanel.revalidate();
+                mainGamePanel.repaint();
+        }
     }});
 
     // Création du bouton pour démarrer la partie
@@ -1171,16 +1193,18 @@ public class FenetrePrincipal extends JFrame implements Serializable {
     private void endTurn(int joueur, int tour, Partie partie) {
         // Créer ou mettre à jour le JLabel existant pour afficher le message
         String message = "Le tour " + tour + " du joueur " + joueur + " commence !";
+        if (partie.getJoueur2().isEstIA()) message = "Le tour " + (tour-1) + " du joueur " + (joueur-1) + " commence !";
         messageStatusLabel.setText(message);
+       // System.out.println(joueur);
 
-        System.out.println("Fin de partie defense : " + (partie.getMode().equals("defense") && partie.partieTerminee()));
+        System.out.println("Fin de partie defense : " + (this.partie.getMode()));//.equals("defense")));// && partie.partieTerminee()));
 
         if (partie.getMode().equals("defense") && partie.partieTerminee()) {
             finDePartie();
         }
 
         // Optionnel : Changer la couleur du message en fonction du joueur
-        if (joueur == 1) {
+        if (joueur == 1 || partie.getJoueur2().isEstIA()) {
             messageStatusLabel.setForeground(new Color(0x00FF00)); // Vert pour le joueur 1
         } else {
             messageStatusLabel.setForeground(new Color(0xFF0000)); // Rouge pour le joueur 2
@@ -1202,9 +1226,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
         // Réinitialiser les unités du joueur actuel
         Joueur joueurActuel = joueur == 1 ? partie.getJoueur1() : partie.getJoueur2();
-        System.out.println("Joueur " + partie.getJoueur1().getId() + " a " + partie.getJoueur1().getUnites().size() + " unités.");
+       // System.out.println("Joueur " + partie.getJoueur1().getId() + " a " + partie.getJoueur1().getUnites().size() + " unités.");
         for (Unite unite : partie.getJoueur1().getUnites()) {
-            System.out.println("Unité " + unite.getNom() + " est attaquée le tour precedant : " + unite.getEstAttaque());
+            //System.out.println("Unité " + unite.getNom() + " est attaquée le tour precedant : " + unite.getEstAttaque());
         }
         for (Unite unite : joueurActuel.getUnites()) {
             unite.recupererPV(); // Récupérer des points de vie

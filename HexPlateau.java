@@ -105,7 +105,7 @@ public class HexPlateau extends JPanel implements Serializable {
     private void gererClick(int x, int y) {
        // System.out.println("x : " + x + " y : " + y);
         Joueur joueurActuel = partie.getJoueurActuel();
-        System.out.println(partie.partieTerminee());
+       // System.out.println(partie.partieTerminee());
 
         // Parcours de toutes les cases du plateau
         for (int i = 0; i < plateau.getLignes(); i++) {
@@ -138,7 +138,7 @@ public class HexPlateau extends JPanel implements Serializable {
                             // Tour impair -> placement possible dans les colonnes < 3
                             if (partie.getToursInd() % 2 == 1) {
                                 if (j <= 3) {
-                                    historyPlayerUnits.add(new AbstractMap.SimpleEntry<>(i, j));
+                                    historyPlayerUnits.add(new AbstractMap.SimpleEntry<>(x, y));
                                     hexCase.placerUnite(uniteSelectionnee);
                                     partie.getJoueur1().ajouterUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
@@ -613,7 +613,7 @@ public class HexPlateau extends JPanel implements Serializable {
         return false;
     }
 
-    private void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur, boolean bool) {
+    public void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur, boolean bool) {
         // Rendre la case centrale visible
         plateau.getCase(ligne, colonne).setVisiblePour(joueur, bool);
         
@@ -652,6 +652,33 @@ public class HexPlateau extends JPanel implements Serializable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void fixPlayer1Invisible() {
+        for (int i = 0; i < 2; i++) {
+            for (AbstractMap.SimpleEntry<Integer, Integer> coords : historyPlayerUnits) {
+              //  System.out.println("x : " + coords.getKey() + " y : " + coords.getValue());
+                MouseEvent clickEvent = new MouseEvent(
+                        this,
+                        MouseEvent.MOUSE_CLICKED,
+                        System.currentTimeMillis(),
+                        0,
+                        coords.getKey(), coords.getValue(),
+                        1,
+                        false,
+                        MouseEvent.BUTTON1
+                );
+                this.dispatchEvent(clickEvent);
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        estEntrainDeplace = false;
+        casesAccessiblesCache = null;
+        repaint();
     }
 
     public ArrayList<AbstractMap.SimpleEntry<Integer, Integer>> getHistoryPlayerUnits() {
