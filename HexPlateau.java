@@ -651,7 +651,7 @@ public class HexPlateau extends JPanel implements Serializable {
         return null; // Si l'unité n'est pas trouvée (ne devrait jamais arriver)
     }
 
-    private void recalculerVisibiliteGlobale(Joueur joueur) {
+    public void recalculerVisibiliteGlobale(Joueur joueur) {
         // D'abord, tout masquer
         for (int i = 0; i < plateau.getLignes(); i++) {
             for (int j = 0; j < plateau.getColonnes(); j++) {

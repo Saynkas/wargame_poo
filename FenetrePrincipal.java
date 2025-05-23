@@ -912,6 +912,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                             }
                         }
                     }
+                    hexPlateau.recalculerVisibiliteGlobale(partie.getJoueur2());
                     endTurn(partie.getJoueur1().getId(), partie.getTurnNumber(), partie);
                     partie.setTurnNumber(partie.getTurnNumber() + 1);
                     buttonEndTurn.doClick();
