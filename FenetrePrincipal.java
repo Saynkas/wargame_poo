@@ -667,7 +667,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         String gagnant;
         String message;
         
-        if (partie.getMode() == "annihilation") {
+        if (partie.getMode().equals("annihilation")) {
             boolean joueur1Gagne = partie.getJoueur1().aDesUnitesVivantes();
             
             if (partie.getJoueur2().isEstIA()) {
