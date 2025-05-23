@@ -5,6 +5,10 @@ public class Partie implements Serializable {
 
     private Joueur joueur1;
     private Joueur joueur2;
+    private Joueur joueurActuel;
+    // joueurActuel est le joueur qui doit jouer
+    // il est mis à jour à chaque tour
+    // il n'est pas nécessaire de le stocker dans la classe Partie
     private int toursInd; // total des tours individuels
     private int turnNumber; // total des tours (actions de j1 et j2)
     private boolean partieCommence;
@@ -80,12 +84,14 @@ public class Partie implements Serializable {
     }
 
     public Joueur getJoueurActuel() {
-        if (toursInd % 2 == 1) {
-            return joueur1;
-        } else {
-            return joueur2;
-        }
+        return joueurActuel;
     }
+
+    public void setJoueurActuel(Joueur joueurActuel) {
+        this.joueurActuel = joueurActuel;
+        // Met à jour le joueur actuel
+    }
+    
     public Plateau getPlateau() {
         return plateau;
     }

@@ -1,22 +1,17 @@
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.*;
+import javax.sound.sampled.*;
+import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-
-import java.util.*;
-
-import java.io.Serializable;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-
-
-
-import javax.sound.sampled.*;
-import javax.swing.*;
 
 public class FenetrePrincipal extends JFrame implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -556,6 +551,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                 Joueur j1 = new Joueur(1, pseudoJoueur1);
                 Joueur j2 = new Joueur(2, pseudoJoueur2);
                 this.partie = new Partie(j1, j2);
+                partie.setJoueurActuel(j1);
 
                 Plateau plateau = new Plateau(12, 18);
                 partie.setPlateau(plateau); // si tu as bien ajouté ce champ
@@ -1123,42 +1119,49 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
         // Bouton de fin de tour
         buttonEndTurn.addActionListener(e -> {
-            partie.setToursInd(partie.getToursInd() + 1);
-        
-            mainGamePanel.remove(leftUnitsPanel);
-            mainGamePanel.remove(rightUnitsPanel);
-            if(partie.getToursInd() <= 2){
-                if (partie.getToursInd() % 2 == 1) {
-                    // Tour du joueur 1
-                    mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
-                } else {
-                    // Tour du joueur 2
-                    mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
-                }
-            }else{
-                partie.setPartieCommence(true);
+            // Vérification si le joueur actuel a des unités vivantes
+            if (partie.getJoueurActuel().getUnites().isEmpty()) {
+                System.out.println("Joueur actuel" + partie.getJoueurActuel().getId());
+                System.out.println("Aucune unité présente, ne pas changer de tour.");
+                System.out.println("Joueur " + partie.getJoueurActuel().getId() + " n'a pas des unités vivantes : " + partie.getJoueurActuel().aDesUnitesVivantes());
+            }
+            else { // Si le joueur a des unités vivantes, on change de tour
+                partie.setToursInd(partie.getToursInd() + 1);            
                 mainGamePanel.remove(leftUnitsPanel);
                 mainGamePanel.remove(rightUnitsPanel);
-                //topPanel.remove(explicationPrep);
+                if(partie.getToursInd() <= 2){ // Phase de préparation
+                    if (partie.getToursInd() % 2 == 1) {
+                        // Tour du joueur 1
+                        mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
+                    } else {
+                        // Tour du joueur 2
+                        mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
+                    }
+                }else{ // Phase de jeu
+                    partie.setPartieCommence(true);
+                    mainGamePanel.remove(leftUnitsPanel);
+                    mainGamePanel.remove(rightUnitsPanel);
+                    //topPanel.remove(explicationPrep);
+                    
+                    // Tu peux remettre l’explication du jeu ici si besoin
+                    //topPanel.add(explicationJeu);
                 
-                // Tu peux remettre l’explication du jeu ici si besoin
-                //topPanel.add(explicationJeu);
-            
+                    mainGamePanel.revalidate();
+                    mainGamePanel.repaint();
+                
+                    //endTurn(1, 1, partie);
+                }
+                
                 mainGamePanel.revalidate();
                 mainGamePanel.repaint();
             
-                endTurn(1, 1, partie);
+                int joueur = (partie.getToursInd() % 2 == 1) ? 1 : 2;
+                if (joueur == 1) {
+                    partie.setTurnNumber(partie.getTurnNumber() + 1);
+                }
+                
+                endTurn(joueur, partie.getTurnNumber(), partie);
             }
-            
-            mainGamePanel.revalidate();
-            mainGamePanel.repaint();
-        
-            int joueur = (partie.getToursInd() % 2 == 1) ? 1 : 2;
-            if (joueur == 1) {
-                partie.setTurnNumber(partie.getTurnNumber() + 1);
-            }
-        
-            endTurn(joueur, partie.getTurnNumber(), partie);
         });
 
         // Création du bouton pour démarrer la partie
@@ -1209,6 +1212,45 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         return jeuPanel;
     }
 
+    private void endTurn(int joueur, int tour, Partie partie) {
+        // Créer ou mettre à jour le JLabel existant pour afficher le message
+        String message = "Le tour " + tour + " du joueur " + joueur + " commence !";
+        messageStatusLabel.setText(message);
+
+        // Optionnel : Changer la couleur du message en fonction du joueur
+        if (joueur == 1) {
+            messageStatusLabel.setForeground(new Color(0x00FF00)); // Vert pour le joueur 1
+        } else {
+            messageStatusLabel.setForeground(new Color(0xFF0000)); // Rouge pour le joueur 2
+        }
+
+        // Créer un Timer pour faire disparaître le message après 2 secondes
+        Timer timer = new Timer(2000, e -> {
+            messageStatusLabel.setText("");  // Effacer le message après 2 secondes
+        });
+        timer.setRepeats(false);
+        timer.start();
+
+        // Réinitialiser les actions du joueur pour ce tour
+        if (joueur == 1) {
+            partie.getJoueur1().resetAAgitCeTour();
+        } else {
+            partie.getJoueur2().resetAAgitCeTour();
+        }
+
+        // Réinitialiser les unités du joueur actuel
+        Joueur joueurActuel = joueur == 1 ? partie.getJoueur1() : partie.getJoueur2();
+        System.out.println("Joueur " + partie.getJoueur1().getId() + " a " + partie.getJoueur1().getUnites().size() + " unités.");
+        for (Unite unite : partie.getJoueur1().getUnites()) {
+            System.out.println("Unité " + unite.getNom() + " est attaquée le tour precedant : " + unite.getEstAttaque());
+        }
+        for (Unite unite : joueurActuel.getUnites()) {
+            unite.recupererPV(); // Récupérer des points de vie
+            unite.reinitialiserTour(); // Réinitialiser l'état des unités pour le tour suivant
+        }
+        partie.setJoueurActuel(joueur == 1 ? partie.getJoueur1() : partie.getJoueur2());
+    }
+
     private JPanel createUnitsPanel(String side) {
         JPanel unitsPanel = new JPanel();
         unitsPanel.setLayout(new BoxLayout(unitsPanel, BoxLayout.Y_AXIS));
@@ -1244,6 +1286,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
 
     private JButton createUnitButton(String unitName, String imagePath) {
+
         JButton button = createStyledButton(unitName); // Utilisation de ton style personnalisé
 
         button.setPreferredSize(new Dimension(200, 60));
@@ -1268,11 +1311,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             case "Infanterie Lourde":
                 InfanterieLourde unitIL = new InfanterieLourde();
                 if (Objects.equals(side, "left")) {
-                    partie.getJoueur1().ajouterUnite(unitIL);
                     unitIL.setProprietaire(partie.getJoueur1());
                 }
                 else {
-                    partie.getJoueur2().ajouterUnite(unitIL);
                     unitIL.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitIL);
@@ -1280,11 +1321,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             case "Archer":
                 Archer unitA = new Archer();
                 if (Objects.equals(side, "left")) {
-                    partie.getJoueur1().ajouterUnite(unitA);
                     unitA.setProprietaire(partie.getJoueur1());
                 }
                 else {
-                    partie.getJoueur2().ajouterUnite(unitA);
                     unitA.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitA);
@@ -1292,11 +1331,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             case "Mage":
                 Mage unitM = new Mage();
                 if (Objects.equals(side, "left")) {
-                    partie.getJoueur1().ajouterUnite(unitM);
                     unitM.setProprietaire(partie.getJoueur1());
                 }
                 else {
-                    partie.getJoueur2().ajouterUnite(unitM);
                     unitM.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitM);
@@ -1304,11 +1341,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             case "Infanterie Legere":
                 InfanterieLegere unitILe = new InfanterieLegere();
                 if (Objects.equals(side, "left")) {
-                    partie.getJoueur1().ajouterUnite(unitILe);
                     unitILe.setProprietaire(partie.getJoueur1());
                 }
                 else {
-                    partie.getJoueur2().ajouterUnite(unitILe);
                     unitILe.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitILe);
@@ -1316,11 +1351,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             case "Cavalerie":
                 Cavalerie unitC = new Cavalerie();
                 if (Objects.equals(side, "left")) {
-                    partie.getJoueur1().ajouterUnite(unitC);
                     unitC.setProprietaire(partie.getJoueur1());
                 }
                 else {
-                    partie.getJoueur2().ajouterUnite(unitC);
                     unitC.setProprietaire(partie.getJoueur2());
                 }
                 hexPlateau.setUniteSelectionnee(unitC);

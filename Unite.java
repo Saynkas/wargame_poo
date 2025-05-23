@@ -1,7 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.io.Serializable;
 
 public abstract class Unite implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -60,6 +60,7 @@ public abstract class Unite implements Serializable {
 
     public void reinitialiserTour() {
         aAgitCeTour = false; // Réinitialise l'état de l'unité à la fin du tour
+        estAttaque = false; // Réinitialise l'état d'attaque
     }
 
     public void recupererPV() {
