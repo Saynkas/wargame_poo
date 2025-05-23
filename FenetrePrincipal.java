@@ -1089,7 +1089,8 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         rightUnitsPanel.setOpaque(false);
 
         // Bouton de fin de tour
-        buttonEndTurn.addActionListener(e -> {
+        buttonEndTurn.addActionListener(e -> {  
+            hexPlateau.setEstEntrainDeplace(false);
             // Vérification si le joueur actuel a des unités vivantes
             if (partie.getJoueurActuel().getUnites().isEmpty()) {
                 System.out.println("Joueur actuel" + partie.getJoueurActuel().getId());

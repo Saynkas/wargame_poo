@@ -254,13 +254,13 @@ public class HexPlateau extends JPanel implements Serializable {
                         
                             // Sinon, déplacement normal vers la case cliquée
                             if (!aAttaque) {
-                                rendreCasesAutourVisibles(ligneInitial, colonneInitial, joueurActuel, false);
+                                
                                 plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                 hexCase.placerUnite(uniteSelectionnee);
+                                recalculerVisibiliteGlobale(joueurActuel);
                                 uniteSelectionnee.setAAgitCeTour(true);
                                 estEntrainDeplace = false;
                                 casesAccessiblesCache = null;
-                                rendreCasesAutourVisibles(i, j, joueurActuel, true);
                                 repaint();
                             }
                         }                        
@@ -284,12 +284,11 @@ public class HexPlateau extends JPanel implements Serializable {
 
                                     // Si la cible est morte, la retirer et déplacer l'attaquant à sa place
                                     if (!cible.estVivant()) {
-                                        rendreCasesAutourVisibles(ligneInitial, colonneInitial, joueurActuel, false);
                                         hexCase.retirerUnite();
                                         plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                         hexCase.placerUnite(uniteSelectionnee);
-                                        if (partie.partieTerminee()) {
-                                            System.out.println(partie.getMode());
+                                        recalculerVisibiliteGlobale(joueurActuel);
+                                        if (!partie.partieTerminee()) {
                                             fenetrePrincipale.finDePartie();
                                         }
                                     }
@@ -317,6 +316,11 @@ public class HexPlateau extends JPanel implements Serializable {
         int dy = Math.abs(y1 - y2);
         return (dx + dy + Math.abs(dx - dy)) / 2;
     }
+
+    public void setEstEntrainDeplace(boolean bool){
+        this.estEntrainDeplace = bool;
+    } 
+
     private int[] getDirection(int fromRow, int fromCol, int toRow, int toCol) {
         int[] direction = new int[2];
         direction[0] = Integer.compare(toRow, fromRow); // direction verticale (-1, 0, 1)
@@ -630,6 +634,37 @@ public class HexPlateau extends JPanel implements Serializable {
                 // Si la distance est inférieure ou égale à la portée de vision rendre visible
                 if (distance <= porteeVision) {
                     plateau.getCase(i, j).setVisiblePour(joueur, bool);
+                }
+            }
+        }
+    }
+
+    private Point trouverPositionUnite(Unite unite) {
+        for (int i = 0; i < plateau.getLignes(); i++) {
+            for (int j = 0; j < plateau.getColonnes(); j++) {
+                HexCase hexCase = plateau.getCase(i, j);
+                if (hexCase.estOccupee() && hexCase.getUnite() == unite) {
+                    return new Point(i, j);
+                }
+            }
+        }
+        return null; // Si l'unité n'est pas trouvée (ne devrait jamais arriver)
+    }
+
+    private void recalculerVisibiliteGlobale(Joueur joueur) {
+        // D'abord, tout masquer
+        for (int i = 0; i < plateau.getLignes(); i++) {
+            for (int j = 0; j < plateau.getColonnes(); j++) {
+                plateau.getCase(i, j).setVisiblePour(joueur, false);
+            }
+        }
+    
+        // Ensuite, réappliquer la visibilité pour chaque unité du joueur
+        for (Unite unite : joueur.getUnites()) {
+            if (unite.estVivant()) {
+                Point position = trouverPositionUnite(unite);
+                if (position != null) {
+                    rendreCasesAutourVisibles(position.x, position.y, joueur, true);
                 }
             }
         }
