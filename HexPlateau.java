@@ -1,16 +1,18 @@
 
-import java.io.Serializable;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 import java.util.*;
 import javax.swing.*;
+import java.util.random.*;
 
 
 
 public class HexPlateau extends JPanel implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final int MAX_UNITES_PAR_JOUEUR = 5; // Limite d'unités par joueur
 
     private static final int RADIUS = 30; //diametre de l'hexagone
 
@@ -38,6 +40,10 @@ public class HexPlateau extends JPanel implements Serializable {
     private final BufferedImage textureDesertBuffered;
     private final Image textureRiviere;
     private final BufferedImage textureRiviereBuffered;
+    private final Image textureBrouillard1;
+    private final BufferedImage textureBrouillardBuffered1;
+    private final Image textureBrouillard2;
+    private final BufferedImage textureBrouillardBuffered2;
 
 
 
@@ -69,6 +75,10 @@ public class HexPlateau extends JPanel implements Serializable {
         this.textureDesertBuffered = toBufferedImage(this.textureDesert);
         this.textureRiviere = new ImageIcon(getClass().getResource("/assets/map/river3.jpg")).getImage();
         this.textureRiviereBuffered = toBufferedImage(this.textureRiviere);
+        this.textureBrouillard1 = new ImageIcon(getClass().getResource("/assets/map/fog.jpg")).getImage();
+        this.textureBrouillardBuffered1 = toBufferedImage(this.textureBrouillard1);
+        this.textureBrouillard2 = new ImageIcon(getClass().getResource("/assets/map/fog2.jpg")).getImage();
+        this.textureBrouillardBuffered2 = toBufferedImage(this.textureBrouillard2);
 
 
         
@@ -111,38 +121,48 @@ public class HexPlateau extends JPanel implements Serializable {
 
                     // Si on est en phase de placement d’une nouvelle unité
                     if (placementNouvelleUnite) {
-
-                        // La case doit être vide pour placer l’unité
+                        // La case doit être vide pour placer l'unité
                         if (!hexCase.estOccupee()) {
-
+                            // Vérifier si le joueur n'a pas déjà atteint la limite d'unités
+                            int unitesJoueur = (partie.getToursInd() % 2 == 1) ? 
+                                              partie.getJoueur1().getUnites().size() : 
+                                              partie.getJoueur2().getUnites().size();
+                            
+                            if (unitesJoueur > MAX_UNITES_PAR_JOUEUR - 1) {
+                                JOptionPane.showMessageDialog(null, "Vous avez atteint la limite maximale d'unités (" + MAX_UNITES_PAR_JOUEUR + ")");
+                                uniteSelectionnee = null;
+                                return;
+                            }
+                    
                             // Tour impair -> placement possible dans les colonnes < 3
                             if (partie.getToursInd() % 2 == 1) {
                                 if (j <= 3) {
                                     historyPlayerUnits.add(new AbstractMap.SimpleEntry<>(i, j));
                                     hexCase.placerUnite(uniteSelectionnee);
+                                    partie.getJoueur1().ajouterUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
                                     hexCase.getUnite().setAAgitCeTour(true);
-                                    rendreCasesAutourVisibles(i, j, joueurActuel);
+                                    rendreCasesAutourVisibles(i, j, joueurActuel, true);
                                     repaint();
-                                }else{
-                                    JOptionPane.showMessageDialog(null, "respecte les limite a gauche");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "respectez les limites a gauche");
                                 }
                             } 
                             // Tour pair -> placement possible dans les colonnes > (total - 3)
                             else if (partie.getToursInd() % 2 == 0) {
                                 if (j >= (plateau.getColonnes() - 4)) {
                                     hexCase.placerUnite(uniteSelectionnee);
+                                    partie.getJoueur2().ajouterUnite(uniteSelectionnee);
                                     uniteSelectionnee = null;
                                     placementNouvelleUnite = false;
                                     hexCase.getUnite().setAAgitCeTour(true);
-                                    rendreCasesAutourVisibles(i, j, joueurActuel);
+                                    rendreCasesAutourVisibles(i, j, joueurActuel, true);
                                     repaint();
-                                }else{
-                                    JOptionPane.showMessageDialog(null, "respecte les limite a droite");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "respectez les limites a droite");
                                 }
                             }
-
                         }
                         return; // Fin du traitement si on était en placement
                     } 
@@ -164,7 +184,7 @@ public class HexPlateau extends JPanel implements Serializable {
                             estEntrainDeplace = true;
                             oldHexCase = hexCase;
                             calculerCasesAccessibles();
-                            rendreCasesAutourVisibles(i, j, joueurActuel);
+                            rendreCasesAutourVisibles(i, j, joueurActuel, true);
                             repaint();
                         }
                     } 
@@ -175,7 +195,6 @@ public class HexPlateau extends JPanel implements Serializable {
                         if (hexCase == oldHexCase) {
                             estEntrainDeplace = false;
                             casesAccessiblesCache = null;
-                            rendreCasesAutourVisibles(i, j, joueurActuel);
                             repaint();
                         } 
                         // Sinon si la case ciblée est libre et accessible
@@ -220,7 +239,7 @@ public class HexPlateau extends JPanel implements Serializable {
                                                 //uniteSelectionnee.setAAgitCeTour(true);
                                                 estEntrainDeplace = false;
                                                 casesAccessiblesCache = null;
-                                                rendreCasesAutourVisibles(fromRow, fromCol, joueurActuel);
+                                                rendreCasesAutourVisibles(fromRow, fromCol, joueurActuel, true);
                                                 repaint();
                                                 aAttaque = true;
                                                 caseCible.getUnite().setEstAttaque(true);
@@ -234,12 +253,13 @@ public class HexPlateau extends JPanel implements Serializable {
                         
                             // Sinon, déplacement normal vers la case cliquée
                             if (!aAttaque) {
+                                rendreCasesAutourVisibles(ligneInitial, colonneInitial, joueurActuel, false);
                                 plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                 hexCase.placerUnite(uniteSelectionnee);
                                 uniteSelectionnee.setAAgitCeTour(true);
                                 estEntrainDeplace = false;
                                 casesAccessiblesCache = null;
-                                rendreCasesAutourVisibles(i, j, joueurActuel);
+                                rendreCasesAutourVisibles(i, j, joueurActuel, true);
                                 repaint();
                             }
                         }                        
@@ -263,6 +283,7 @@ public class HexPlateau extends JPanel implements Serializable {
 
                                     // Si la cible est morte, la retirer et déplacer l'attaquant à sa place
                                     if (!cible.estVivant()) {
+                                        rendreCasesAutourVisibles(ligneInitial, colonneInitial, joueurActuel, false);
                                         hexCase.retirerUnite();
                                         plateau.getCase(ligneInitial, colonneInitial).retirerUnite();
                                         hexCase.placerUnite(uniteSelectionnee);
@@ -537,9 +558,20 @@ public class HexPlateau extends JPanel implements Serializable {
 
                 
                 if (!hexCase.estVisiblePour(joueurActuel)) {
-                    Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
+                    /*Color brouillard = new Color(255, 255, 255, 200); // Blanc avec transparence (alpha = 180)
                     g2d.setColor(brouillard);
-                    g2d.fillPolygon(hex);
+                    g2d.fillPolygon(hex);*/
+                    Random random = new Random();
+                    int intRand = random.nextInt(2) + 1;
+                    if(intRand == 1){
+                        TexturePaint texture = new TexturePaint(textureBrouillardBuffered1, hex.getBounds());
+                        g2d.setPaint(texture);
+                        g2d.fill(hex);
+                    }else{
+                        TexturePaint texture = new TexturePaint(textureBrouillardBuffered2, hex.getBounds());
+                        g2d.setPaint(texture);
+                        g2d.fill(hex);
+                    }
                 }
 
                 // limite du joueur 1
@@ -579,9 +611,9 @@ public class HexPlateau extends JPanel implements Serializable {
         return false;
     }
 
-    private void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur) {
+    private void rendreCasesAutourVisibles(int ligne, int colonne, Joueur joueur, boolean bool) {
         // Rendre la case centrale visible
-        plateau.getCase(ligne, colonne).setVisiblePour(joueur, true);
+        plateau.getCase(ligne, colonne).setVisiblePour(joueur, bool);
         
         //  vision de l'unité
         HexCase caseCentrale = plateau.getCase(ligne, colonne);
@@ -595,7 +627,7 @@ public class HexPlateau extends JPanel implements Serializable {
                 
                 // Si la distance est inférieure ou égale à la portée de vision rendre visible
                 if (distance <= porteeVision) {
-                    plateau.getCase(i, j).setVisiblePour(joueur, true);
+                    plateau.getCase(i, j).setVisiblePour(joueur, bool);
                 }
             }
         }
