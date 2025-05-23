@@ -661,40 +661,6 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         return button;
     }
 
-    private void endTurn(int joueur, int tour, Partie partie) {
-        // Créer ou mettre à jour le JLabel existant pour afficher le message
-        String message = "Le tour " + tour + " du joueur " + joueur + " commence !";
-        messageStatusLabel.setText(message);
-
-        // Optionnel : Changer la couleur du message en fonction du joueur
-        if (joueur == 1) {
-            messageStatusLabel.setForeground(new Color(0x00FF00)); // Vert pour le joueur 1
-        } else {
-            messageStatusLabel.setForeground(new Color(0xFF0000)); // Rouge pour le joueur 2
-        }
-
-        // Créer un Timer pour faire disparaître le message après 2 secondes
-        Timer timer = new Timer(2000, e -> {
-            messageStatusLabel.setText("");  // Effacer le message après 2 secondes
-        });
-        timer.setRepeats(false);
-        timer.start();
-
-        // Réinitialiser les actions du joueur pour ce tour
-        if (joueur == 1) {
-            partie.getJoueur1().resetAAgitCeTour();
-        } else {
-            partie.getJoueur2().resetAAgitCeTour();
-        }
-
-        // Réinitialiser les unités du joueur actuel
-        Joueur joueurActuel = partie.getJoueurActuel();
-        for (Unite unite : joueurActuel.getUnites()) {
-            unite.recupererPV(); // Récupérer des points de vie
-            unite.reinitialiserTour(); // Réinitialiser l'état des unités pour le tour suivant
-        }
-    }
-
     public void finDePartie() {
         topPanel.remove(buttonEndTurn);
         
@@ -1132,11 +1098,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                     if (partie.getToursInd() % 2 == 1) {
                         // Tour du joueur 1
                         mainGamePanel.add(leftUnitsPanel, BorderLayout.WEST);
-                        partie.setJoueurActuel(partie.getJoueur1());
                     } else {
                         // Tour du joueur 2
                         mainGamePanel.add(rightUnitsPanel, BorderLayout.EAST);
-                        partie.setJoueurActuel(partie.getJoueur2());
                     }
                 }else{ // Phase de jeu
                     partie.setPartieCommence(true);
@@ -1150,7 +1114,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                     mainGamePanel.revalidate();
                     mainGamePanel.repaint();
                 
-                    endTurn(1, 1, partie);
+                    //endTurn(1, 1, partie);
                 }
                 
                 mainGamePanel.revalidate();
@@ -1211,6 +1175,45 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         jeuPanel.add(mainGamePanel, BorderLayout.CENTER);
 
         return jeuPanel;
+    }
+
+    private void endTurn(int joueur, int tour, Partie partie) {
+        // Créer ou mettre à jour le JLabel existant pour afficher le message
+        String message = "Le tour " + tour + " du joueur " + joueur + " commence !";
+        messageStatusLabel.setText(message);
+
+        // Optionnel : Changer la couleur du message en fonction du joueur
+        if (joueur == 1) {
+            messageStatusLabel.setForeground(new Color(0x00FF00)); // Vert pour le joueur 1
+        } else {
+            messageStatusLabel.setForeground(new Color(0xFF0000)); // Rouge pour le joueur 2
+        }
+
+        // Créer un Timer pour faire disparaître le message après 2 secondes
+        Timer timer = new Timer(2000, e -> {
+            messageStatusLabel.setText("");  // Effacer le message après 2 secondes
+        });
+        timer.setRepeats(false);
+        timer.start();
+
+        // Réinitialiser les actions du joueur pour ce tour
+        if (joueur == 1) {
+            partie.getJoueur1().resetAAgitCeTour();
+        } else {
+            partie.getJoueur2().resetAAgitCeTour();
+        }
+
+        // Réinitialiser les unités du joueur actuel
+        Joueur joueurActuel = joueur == 1 ? partie.getJoueur1() : partie.getJoueur2();
+        System.out.println("Joueur " + partie.getJoueur1().getId() + " a " + partie.getJoueur1().getUnites().size() + " unités.");
+        for (Unite unite : partie.getJoueur1().getUnites()) {
+            System.out.println("Unité " + unite.getNom() + " est attaquée le tour precedant : " + unite.getEstAttaque());
+        }
+        for (Unite unite : joueurActuel.getUnites()) {
+            unite.recupererPV(); // Récupérer des points de vie
+            unite.reinitialiserTour(); // Réinitialiser l'état des unités pour le tour suivant
+        }
+        partie.setJoueurActuel(joueur == 1 ? partie.getJoueur1() : partie.getJoueur2());
     }
 
     private JPanel createUnitsPanel(String side) {
