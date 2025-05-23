@@ -813,13 +813,13 @@ public class FenetrePrincipal extends JFrame implements Serializable {
 
     // Panel principal qui contient les trois colonnes
     JPanel mainGamePanel = new JPanel(new BorderLayout());
-    mainGamePanel.setOpaque(false); // <-- Ajoute ça aussi
+    mainGamePanel.setOpaque(false); 
 
     // Création des panneaux d'unités
     JPanel leftUnitsPanel = createUnitsPanel("left");
-    leftUnitsPanel.setOpaque(false); // <-- Et ici
+    leftUnitsPanel.setOpaque(false);
     JPanel rightUnitsPanel = createUnitsPanel("right");
-    rightUnitsPanel.setOpaque(false); // <-- Et ici aussi
+    rightUnitsPanel.setOpaque(false); 
 
     // Bouton de fin de tour
     buttonEndTurn.addActionListener(e -> {
@@ -872,10 +872,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                 partie.setPartieCommence(true);
                 mainGamePanel.remove(leftUnitsPanel);
                 mainGamePanel.remove(rightUnitsPanel);
-                //topPanel.remove(explicationPrep);
-
-                // Tu peux remettre l’explication du jeu ici si besoin
-                //topPanel.add(explicationJeu);
+        
                 if (partie.getJoueurActuel() == partie.getJoueur2()) {
                     for (int i = 0; i < hexPlateau.getPlateau().getLignes(); i++) {
                         for (int j = 0; j < hexPlateau.getPlateau().getColonnes(); j++) {
@@ -936,10 +933,6 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         mainGamePanel.remove(rightUnitsPanel);
         topPanel.remove(explicationPrep);
         topPanel.remove(startGame);
-
-        // Tu peux remettre l’explication du jeu ici si besoin
-        //topPanel.add(explicationJeu);
-
         mainGamePanel.revalidate();
         mainGamePanel.repaint();
 
@@ -1091,9 +1084,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         
         // Création des panneaux d'unités
         JPanel leftUnitsPanel = createUnitsPanel("left");
-        leftUnitsPanel.setOpaque(false); // <-- Et ici
+        leftUnitsPanel.setOpaque(false); 
         JPanel rightUnitsPanel = createUnitsPanel("right");
-        rightUnitsPanel.setOpaque(false); // <-- Et ici aussi
+        rightUnitsPanel.setOpaque(false);
 
         // Bouton de fin de tour
         buttonEndTurn.addActionListener(e -> {
@@ -1120,9 +1113,6 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                     mainGamePanel.remove(leftUnitsPanel);
                     mainGamePanel.remove(rightUnitsPanel);
                     //topPanel.remove(explicationPrep);
-                    
-                    // Tu peux remettre l’explication du jeu ici si besoin
-                    //topPanel.add(explicationJeu);
                 
                     mainGamePanel.revalidate();
                     mainGamePanel.repaint();
@@ -1149,11 +1139,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
             mainGamePanel.remove(leftUnitsPanel);
             mainGamePanel.remove(rightUnitsPanel);
             topPanel.remove(explicationPrep);
-            topPanel.remove(startGame);
-            
-            // Tu peux remettre l’explication du jeu ici si besoin
-            //topPanel.add(explicationJeu);
-        
+            topPanel.remove(startGame);   
             mainGamePanel.revalidate();
             mainGamePanel.repaint();
         
