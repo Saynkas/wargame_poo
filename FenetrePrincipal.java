@@ -566,7 +566,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                 cardLayout.show(mainPanel, "plateau");
             }
         }
-    });
+    }); //test
 
 
 
