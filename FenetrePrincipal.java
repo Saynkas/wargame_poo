@@ -504,7 +504,7 @@ public class FenetrePrincipal extends JFrame implements Serializable {
         );
 
         if (choix == 0) {
-            String cheminFichier = "sauvegardes/sauvegarde_partie.ser";
+            String cheminFichier = "./sauvegardes/sauvegarde_partie.ser";
             Partie partieChargee = chargerPartie(cheminFichier);
             if (partieChargee != null) {
                 this.partie = partieChargee;
@@ -514,8 +514,9 @@ public class FenetrePrincipal extends JFrame implements Serializable {
                     JOptionPane.showMessageDialog(this, "La sauvegarde ne contient pas de plateau.");
                     return;
                 }
-
+                JOptionPane.showMessageDialog(this, "charge avec success.");
                 hexPlateau = new HexPlateau(plateau, partie, buttonEndTurn, this);
+                hexPlateau.toString();
                 JPanel jeuPanel = creeJeuPanel(plateau);
                 mainPanel.add(jeuPanel, "plateau");
                 cardLayout.show(mainPanel, "plateau");

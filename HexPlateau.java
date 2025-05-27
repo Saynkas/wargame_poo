@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.*;
 import javax.swing.*;
-import java.util.random.*;
 
 
 
@@ -723,6 +722,17 @@ public class HexPlateau extends JPanel implements Serializable {
 
     public Plateau getPlateau() {
         return plateau;
+    }
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("HexPlateau:\n");
+        for (int i = 0; i < plateau.getLignes(); i++) {
+            for (int j = 0; j < plateau.getColonnes(); j++) {
+                HexCase hexCase = plateau.getCase(i, j);
+                sb.append("Case(").append(i).append(", ").append(j).append("): ").append(hexCase.getTerrain()).append("\n");
+            }
+        }
+        return sb.toString();
     }
 }
 
